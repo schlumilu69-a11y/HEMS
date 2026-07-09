@@ -1,0 +1,33 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+# Version : 0.1.0-alpha
+#
+# Datei : booleans.yaml
+#
+################################################################################
+
+hems_enabled:
+  name: HEMS aktiviert
+  icon: mdi:home-lightning-bolt
+
+hems_debug:
+  name: Debug Modus
+  icon: mdi:bug
+
+hems_auto_phase:
+  name: Automatische Phasenumschaltung
+  icon: mdi:electric-switch
+
+hems_allow_grid_charging:
+  name: Netzladen erlauben
+  icon: mdi:transmission-tower
+
+hems_allow_battery_charging:
+  name: Batteriespeicher verwenden
+  icon: mdi:battery
+
+hems_vehicle_priority:
+  name: Fahrzeugpriorisierung aktiv
+  icon: mdi:car-multiple
