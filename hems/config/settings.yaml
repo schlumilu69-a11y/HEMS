@@ -1,0 +1,56 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+# Version : 0.1.0-alpha
+#
+# Datei : settings.yaml
+#
+# Beschreibung:
+# Zentrale Konfiguration aller HEMS-Parameter.
+#
+################################################################################
+
+hems:
+
+  general:
+
+    enabled: true
+
+    debug: false
+
+    controller_interval: 30
+
+  energy:
+
+    target_grid_power: 300
+
+    reserve_power: 200
+
+  charging:
+
+    minimum_ampere: 6
+
+    maximum_ampere: 16
+
+    minimum_runtime: 300
+
+    restart_delay: 120
+
+  phase:
+
+    auto_switch: true
+
+    switch_to_three_phase: 4500
+
+    switch_to_one_phase: 3500
+
+    minimum_switch_interval: 300
+
+  vehicle:
+
+    priority:
+
+      - tesla
+
+      - go-e
