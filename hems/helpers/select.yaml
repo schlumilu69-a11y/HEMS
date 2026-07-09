@@ -1,0 +1,26 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+################################################################################
+
+hems_vehicle_priority_mode:
+  name: Fahrzeugpriorität
+
+  options:
+    - Tesla
+    - go-e
+    - Automatisch
+
+  initial: Automatisch
+
+hems_charge_mode:
+  name: Lademodus
+
+  options:
+    - PV
+    - Netz
+    - Hybrid
+    - Automatisch
+
+  initial: Automatisch
