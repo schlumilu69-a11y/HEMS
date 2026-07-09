@@ -1,0 +1,86 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+################################################################################
+
+hems_target_grid_power:
+  name: Ziel Netzleistung
+  min: -5000
+  max: 5000
+  step: 50
+  unit_of_measurement: W
+  mode: box
+  initial: 300
+
+hems_power_reserve:
+  name: Leistungsreserve
+  min: 0
+  max: 3000
+  step: 50
+  unit_of_measurement: W
+  mode: box
+  initial: 200
+
+hems_min_ampere:
+  name: Minimaler Ladestrom
+  min: 6
+  max: 16
+  step: 1
+  unit_of_measurement: A
+  mode: slider
+  initial: 6
+
+hems_max_ampere:
+  name: Maximaler Ladestrom
+  min: 6
+  max: 16
+  step: 1
+  unit_of_measurement: A
+  mode: slider
+  initial: 16
+
+hems_phase_switch_up:
+  name: Umschaltung auf 3 Phasen
+  min: 3500
+  max: 11000
+  step: 100
+  unit_of_measurement: W
+  mode: box
+  initial: 4500
+
+hems_phase_switch_down:
+  name: Umschaltung auf 1 Phase
+  min: 1500
+  max: 9000
+  step: 100
+  unit_of_measurement: W
+  mode: box
+  initial: 3500
+
+hems_controller_interval:
+  name: Reglerintervall
+  min: 10
+  max: 120
+  step: 5
+  unit_of_measurement: s
+  mode: slider
+  initial: 30
+
+hems_min_runtime:
+  name: Mindestlaufzeit
+  min: 0
+  max: 1800
+  step: 30
+  unit_of_measurement: s
+  mode: box
+  initial: 300
+
+hems_restart_delay:
+  name: Neustartverzögerung
+  min: 0
+  max: 1800
+  step: 30
+  unit_of_measurement: s
+  mode: box
+  initial: 120
