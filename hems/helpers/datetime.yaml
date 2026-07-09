@@ -1,0 +1,25 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+################################################################################
+
+hems_last_start:
+  name: Letzter Ladestart
+  has_date: true
+  has_time: true
+
+hems_last_stop:
+  name: Letzter Ladestopp
+  has_date: true
+  has_time: true
+
+hems_last_phase_change:
+  name: Letzter Phasenwechsel
+  has_date: true
+  has_time: true
+
+hems_last_current_change:
+  name: Letzte Stromänderung
+  has_date: true
+  has_time: true
