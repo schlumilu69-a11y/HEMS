@@ -1,6 +1,6 @@
 ################################################################################
 #
-# HEMS
+# HEMS - Home Energy Management System
 #
 # Version : 0.1.0-alpha
 #
@@ -14,7 +14,7 @@ input_datetime: !include helpers/datetime.yaml
 
 input_select: !include helpers/select.yaml
 
-template: !include templates/sensors.yaml
+template: !include templates/templates.yaml
 
 script: !include scripts/scripts.yaml
 
