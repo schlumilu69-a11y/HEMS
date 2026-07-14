@@ -6,6 +6,125 @@
 #
 # Datei : automations.yaml
 #
+# Beschreibung:
+# Zentraler HEMS Controller
+#
 ################################################################################
 
-[]
+- id: hems_controller
+
+  alias: HEMS - Controller
+
+  description: >
+    Zentraler Controller des Home Energy Management Systems.
+
+  mode: single
+
+###############################################################################
+# Trigger
+###############################################################################
+
+  trigger:
+
+    - trigger: time_pattern
+      seconds: "/30"
+
+###############################################################################
+# Bedingungen
+###############################################################################
+
+  condition:
+
+    - condition: state
+      entity_id: input_boolean.hems_enabled
+      state: "on"
+
+###############################################################################
+# Variablen
+###############################################################################
+
+  variables:
+
+    controller_ready: >
+      {{ is_state('binary_sensor.hems_controller_ready','on') }}
+
+    charging: >
+      {{ is_state('binary_sensor.hems_charging_active','on') }}
+
+    connected: >
+      {{ is_state('binary_sensor.hems_vehicle_connected','on') }}
+
+    grid_power: >
+      {{ states('sensor.hems_grid_power') | float(0) }}
+
+    delta_power: >
+      {{ states('sensor.hems_power_delta') | float(0) }}
+
+###############################################################################
+# Aktionen
+###############################################################################
+
+  action:
+
+###############################################################################
+# Controller nicht bereit
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ not controller_ready }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: "Controller waiting"
+
+        - stop: "Controller not ready"
+
+###############################################################################
+# Fahrzeug nicht verbunden
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ not connected }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: "No vehicle connected"
+
+        - stop: "No vehicle"
+
+###############################################################################
+# Debug Ausgabe
+###############################################################################
+
+    - if:
+
+        - condition: state
+          entity_id: input_boolean.hems_debug
+          state: "on"
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Grid={{ grid_power }}W |
+              Delta={{ delta_power }}W |
+              Charging={{ charging }}
+
+###############################################################################
+# Platzhalter für Power Manager
+###############################################################################
+
+    - action: script.hems_log
+      data:
+        message: "Controller cycle finished"
