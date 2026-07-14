@@ -1,0 +1,125 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+# Version : 0.1.0-alpha
+#
+# Datei : sensors.yaml
+#
+################################################################################
+
+- sensor:
+
+###############################################################################
+# Grid Power
+###############################################################################
+
+    - name: HEMS Grid Power
+      unique_id: hems_grid_power
+
+      unit_of_measurement: W
+
+      device_class: power
+
+      state_class: measurement
+
+      state: >
+
+        {{ states('sensor.pv_charge_grid_power') | float(0) }}
+
+###############################################################################
+# Charging Power
+###############################################################################
+
+    - name: HEMS Charging Power
+      unique_id: hems_charging_power
+
+      unit_of_measurement: W
+
+      device_class: power
+
+      state_class: measurement
+
+      state: >
+
+        {{ states('sensor.goe_082888_nrg_11') | float(0) }}
+
+###############################################################################
+# Current Ampere
+###############################################################################
+
+    - name: HEMS Charging Current
+
+      unique_id: hems_charging_current
+
+      unit_of_measurement: A
+
+      state: >
+
+        {{ states('number.goe_082888_amp') | float(0) }}
+
+###############################################################################
+# Available Power
+###############################################################################
+
+    - name: HEMS Available Power
+
+      unique_id: hems_available_power
+
+      unit_of_measurement: W
+
+      device_class: power
+
+      state_class: measurement
+
+      state: >
+
+        {% set grid = states('sensor.hems_grid_power') | float(0) %}
+        {% set target = states('input_number.hems_target_grid_power') | float(300) %}
+
+        {{ (grid - target) | round(0) }}
+
+###############################################################################
+# Power Delta
+###############################################################################
+
+    - name: HEMS Power Delta
+
+      unique_id: hems_power_delta
+
+      unit_of_measurement: W
+
+      device_class: power
+
+      state_class: measurement
+
+      state: >
+
+        {% set reserve = states('input_number.hems_power_reserve') | float(200) %}
+        {% set available = states('sensor.hems_available_power') | float(0) %}
+
+        {{ (available - reserve) | round(0) }}
+
+###############################################################################
+# Vehicle Connected
+###############################################################################
+
+    - name: HEMS Vehicle Connected
+
+      unique_id: hems_vehicle_connected
+
+      state: >
+
+        {{ is_state('binary_sensor.goe_082888_car_0','on') }}
+
+###############################################################################
+# Charging Active
+###############################################################################
+
+    - name: HEMS Charging Active
+
+      unique_id: hems_charging_active
+
+      state: >
+
+        {{ states('sensor.hems_charging_power') | float(0) > 100 }}
