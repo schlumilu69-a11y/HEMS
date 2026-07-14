@@ -1,1 +1,52 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+# Version : 0.1.0-alpha
+#
+# Datei : templates.yaml
+#
+################################################################################
 
+###############################################################################
+# SENSORS
+###############################################################################
+
+- sensor:
+
+    - name: HEMS Grid Power
+      unique_id: hems_grid_power
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
+      state: >
+        {{ states('sensor.pv_charge_grid_power') | float(0) }}
+
+    - name: HEMS Charging Power
+      unique_id: hems_charging_power
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
+      state: >
+        {{ states('sensor.goe_082888_nrg_11') | float(0) }}
+
+    # weitere Sensoren ...
+
+###############################################################################
+# BINARY SENSORS
+###############################################################################
+
+- binary_sensor:
+
+    - name: HEMS Enabled
+      unique_id: hems_enabled
+      state: >
+        {{ is_state('input_boolean.hems_enabled','on') }}
+
+    - name: HEMS Vehicle Connected
+      unique_id: hems_vehicle_connected
+      device_class: plug
+      state: >
+        {{ is_state('binary_sensor.goe_082888_car_0','on') }}
+
+    # weitere Binary Sensoren ...
