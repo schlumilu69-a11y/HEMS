@@ -1,1 +1,156 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+# Version : 0.1.0-alpha
+#
+# Datei : scripts.yaml
+#
+# Beschreibung:
+# Hardware Abstraktionsschicht
+#
+################################################################################
 
+###############################################################################
+# LOGGING
+###############################################################################
+
+hems_log:
+
+  alias: HEMS - Log
+
+  mode: queued
+
+  fields:
+
+    message:
+      description: Lognachricht
+
+  sequence:
+
+    - action: logbook.log
+      data:
+        name: HEMS
+        message: "{{ message }}"
+
+###############################################################################
+# START CHARGING
+###############################################################################
+
+hems_charge_start:
+
+  alias: HEMS - Charge Start
+
+  mode: single
+
+  sequence:
+
+    ###########################################################################
+    # Immer 1-phasig starten
+    ###########################################################################
+
+    - action: script.hems_phase_single
+
+    ###########################################################################
+    # Minimalstrom setzen
+    ###########################################################################
+
+    - action: script.hems_set_current
+      data:
+        ampere: "{{ states('input_number.hems_min_ampere') | int(6) }}"
+
+    ###########################################################################
+    # Laden freigeben
+    ###########################################################################
+
+    - action: script.hems_charge_resume
+
+    ###########################################################################
+    # Zeit merken
+    ###########################################################################
+
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.hems_last_start
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    ###########################################################################
+    # Logging
+    ###########################################################################
+
+    - action: script.hems_log
+      data:
+        message: "Charging started"
+
+###############################################################################
+# STOP CHARGING
+###############################################################################
+
+hems_charge_stop:
+
+  alias: HEMS - Charge Stop
+
+  mode: single
+
+  sequence:
+
+    - action: select.select_option
+      target:
+        entity_id: select.goe_082888_frc
+      data:
+        option: "1"
+
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.hems_last_stop
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    - action: script.hems_log
+      data:
+        message: "Charging stopped"
+
+###############################################################################
+# PAUSE CHARGING
+###############################################################################
+
+hems_charge_pause:
+
+  alias: HEMS - Charge Pause
+
+  mode: single
+
+  sequence:
+
+    - action: select.select_option
+      target:
+        entity_id: select.goe_082888_frc
+      data:
+        option: "0"
+
+    - action: script.hems_log
+      data:
+        message: "Charging paused"
+
+###############################################################################
+# RESUME CHARGING
+###############################################################################
+
+hems_charge_resume:
+
+  alias: HEMS - Charge Resume
+
+  mode: single
+
+  sequence:
+
+    - action: select.select_option
+      target:
+        entity_id: select.goe_082888_frc
+      data:
+        option: "2"
+
+    - action: script.hems_log
+      data:
+        message: "Charging resumed"
