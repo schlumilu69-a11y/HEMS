@@ -154,8 +154,9 @@ hems_charge_resume:
     - action: script.hems_log
       data:
         message: "Charging resumed"
+        
 ###############################################################################
-# HEMS CONTROLLER
+# CONTROLLER
 ###############################################################################
 
 hems_controller:
@@ -183,22 +184,26 @@ hems_controller:
       state: "on"
 
     ###########################################################################
-    # Start Manager
+    # Start prüfen
     ###########################################################################
 
     - action: script.hems_start_manager
 
     ###########################################################################
-    # Power Manager
+    # Nur regeln wenn geladen wird
     ###########################################################################
 
-    - action: script.hems_power_manager
+    - if:
 
-    ###########################################################################
-    # Stop Manager
-    ###########################################################################
+        - condition: state
+          entity_id: binary_sensor.hems_charging_active
+          state: "on"
 
-    - action: script.hems_stop_manager
+      then:
+
+        - action: script.hems_power_manager
+
+        - action: script.hems_stop_manager
 
 ###############################################################################
 # START MANAGER
