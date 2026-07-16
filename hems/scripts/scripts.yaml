@@ -154,3 +154,103 @@ hems_charge_resume:
     - action: script.hems_log
       data:
         message: "Charging resumed"
+###############################################################################
+# HEMS CONTROLLER
+###############################################################################
+
+hems_controller:
+
+  alias: HEMS - Controller
+
+  mode: single
+
+  sequence:
+
+    ###########################################################################
+    # HEMS aktiviert?
+    ###########################################################################
+
+    - condition: state
+      entity_id: input_boolean.hems_enabled
+      state: "on"
+
+    ###########################################################################
+    # Fahrzeug verbunden?
+    ###########################################################################
+
+    - condition: state
+      entity_id: binary_sensor.hems_vehicle_connected
+      state: "on"
+
+    ###########################################################################
+    # Start Manager
+    ###########################################################################
+
+    - action: script.hems_start_manager
+
+    ###########################################################################
+    # Power Manager
+    ###########################################################################
+
+    - action: script.hems_power_manager
+
+    ###########################################################################
+    # Stop Manager
+    ###########################################################################
+
+    - action: script.hems_stop_manager
+
+###############################################################################
+# START MANAGER
+###############################################################################
+
+hems_start_manager:
+
+  alias: HEMS - Start Manager
+
+  mode: single
+
+  variables:
+
+    charging: >
+      {{ is_state('binary_sensor.hems_charging_active','on') }}
+
+    delta: >
+      {{ states('sensor.hems_power_delta') | float(0) }}
+
+    start_power: >
+      {{ states('input_number.hems_start_power') | float(1500) }}
+
+  sequence:
+
+    ###########################################################################
+    # Lädt bereits?
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: "{{ charging }}"
+
+      then:
+
+        - stop: Already charging
+
+    ###########################################################################
+    # Genug Leistung vorhanden?
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ delta >= start_power }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Start Manager: Überschuss {{ delta }}W
+
+        - action: script.hems_charge_start
