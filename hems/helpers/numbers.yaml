@@ -111,3 +111,11 @@ hems_current_step:
   mode: slider
   unit_of_measurement: A
   initial: 120
+
+hems_deadband:
+  name: Regel-Totzone
+  min: 0
+  max: 500
+  step: 50
+  initial: 150
+  unit_of_measurement: W
