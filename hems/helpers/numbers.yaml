@@ -83,4 +83,22 @@ hems_restart_delay:
   step: 30
   unit_of_measurement: s
   mode: box
+
+hems_start_power:
+  name: Startleistung
+  min: 500
+  max: 5000
+  step: 100
+  unit_of_measurement: W
+  mode: box
+  initial: 1500
+
+hems_stop_power:
+  name: Stoppleistung
+  min: 0
+  max: 5000
+  step: 100
+  unit_of_measurement: W
+  mode: box
+  initial: 800
   initial: 120
