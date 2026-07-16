@@ -345,3 +345,58 @@ hems_power_manager:
     - action: script.hems_set_current
       data:
         ampere: "{{ new_current }}"
+
+###############################################################################
+# STOP MANAGER
+###############################################################################
+
+hems_stop_manager:
+
+  alias: HEMS - Stop Manager
+
+  mode: single
+
+  variables:
+
+    charging: >
+      {{ is_state('binary_sensor.hems_charging_active','on') }}
+
+    delta: >
+      {{ states('sensor.hems_power_delta') | float(0) }}
+
+    stop_power: >
+      {{ states('input_number.hems_stop_power') | float(800) }}
+
+  sequence:
+
+    ###########################################################################
+    # Lädt überhaupt?
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: "{{ not charging }}"
+
+      then:
+
+        - stop: Not charging
+
+    ###########################################################################
+    # Zu wenig Überschuss?
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ delta < stop_power }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Stop Manager: Delta {{ delta }}W
+
+        - action: script.hems_charge_stop
