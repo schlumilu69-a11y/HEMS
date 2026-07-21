@@ -1,0 +1,45 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+# Version : 0.2.0-alpha
+#
+# Datei : logging.yaml
+#
+################################################################################
+
+################################################################################
+# LOGGING
+################################################################################
+
+hems_log:
+
+  alias: HEMS - Log
+
+  mode: queued
+
+  fields:
+
+    message:
+      description: Log message
+
+  sequence:
+
+    - if:
+
+        - condition: state
+          entity_id: input_boolean.hems_debug
+          state: "on"
+
+      then:
+
+        - action: system_log.write
+
+          data:
+
+            level: info
+
+            logger: HEMS
+
+            message: >
+              {{ message }}
