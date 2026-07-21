@@ -28,7 +28,7 @@ hems_phase_single:
       target:
         entity_id: select.goe_082888_psm
       data:
-        option: "1-phase"
+        option: "1"
 
 ################################################################################
 # THREE PHASE
@@ -50,7 +50,7 @@ hems_phase_three:
       target:
         entity_id: select.goe_082888_psm
       data:
-        option: "3-phase"
+        option: "2"
 
 ################################################################################
 # AUTO PHASE
