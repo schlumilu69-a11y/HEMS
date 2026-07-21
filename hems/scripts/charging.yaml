@@ -117,8 +117,11 @@ hems_current_set:
 
     - variables:
 
-        current: >
+        requested_current: >
           {{ ampere | int }}
+
+        actual_current: >
+          {{ states('number.goe_082888_amp') | int(0) }}
 
         min_current: >
           {{ states('input_number.hems_min_ampere') | int(6) }}
@@ -127,26 +130,41 @@ hems_current_set:
           {{ states('input_number.hems_max_ampere') | int(16) }}
 
         target_current: >
-          {% if current < min_current %}
+          {% if requested_current < min_current %}
             {{ min_current }}
-          {% elif current > max_current %}
+          {% elif requested_current > max_current %}
             {{ max_current }}
           {% else %}
-            {{ current }}
+            {{ requested_current }}
           {% endif %}
 
-    - action: script.hems_log
-      data:
-        message: >
-          Setting charging current to {{ target_current }} A
+    - if:
 
-    - action: number.set_value
-     - action: input_datetime.set_datetime
-      target:
-        entity_id: input_datetime.hems_last_current_change
-      data:
-        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
-      target:
-        entity_id: number.goe_082888_amp
-      data:
-        value: "{{ target_current }}"
+        - condition: template
+          value_template: "{{ actual_current != (target_current | int) }}"
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Setting charging current from {{ actual_current }} A to {{ target_current }} A
+
+        - action: number.set_value
+          target:
+            entity_id: number.goe_082888_amp
+          data:
+            value: "{{ target_current }}"
+
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.hems_last_current_change
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+      else:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Charging current already {{ actual_current }} A - no change required.
