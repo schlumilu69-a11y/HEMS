@@ -1,116 +1,123 @@
 ################################################################################
-#
-# HEMS - Home Energy Management System
-#
-# Version : 0.2.0-alpha
-#
-# Datei : phase.yaml
-#
+# PHASE MANAGER V2
 ################################################################################
 
-################################################################################
-# SINGLE PHASE
-################################################################################
+hems_phase_manager:
 
-hems_phase_single:
-
-  alias: HEMS - Switch to 1 Phase
-
-  mode: single
-
-  sequence:
-
-    - action: script.hems_log
-      data:
-        message: "Switching Wallbox to 1-phase"
-
-    - action: select.select_option
-      target:
-        entity_id: select.goe_082888_psm
-      data:
-        option: "1"
-
-################################################################################
-# THREE PHASE
-################################################################################
-
-hems_phase_three:
-
-  alias: HEMS - Switch to 3 Phase
-
-  mode: single
-
-  sequence:
-
-    - action: script.hems_log
-      data:
-        message: "Switching Wallbox to 3-phase"
-
-    - action: select.select_option
-      target:
-        entity_id: select.goe_082888_psm
-      data:
-        option: "2"
-
-################################################################################
-# AUTO PHASE
-################################################################################
-
-hems_phase_auto:
-
-  alias: HEMS - Automatic Phase Selection
+  alias: HEMS - Phase Manager
 
   mode: restart
 
   variables:
 
-    available_power: >
-      {{ states('sensor.hems_available_power') | float(0) }}
+    current: >
+      {{ states('sensor.hems_charge_current') | int(6) }}
 
-    switch_power: >
-      {{ states('input_number.hems_phase_switch_power') | float(4200) }}
+    delta: >
+      {{ states('sensor.hems_power_delta') | float(0) }}
 
-    charging: >
-      {{ is_state('binary_sensor.hems_charging_active','on') }}
+    phase: >
+      {{ states('sensor.hems_current_phase') | int(1) }}
+
+    cooldown: 120
+
+    last_switch: >
+      {{ as_timestamp(states('input_datetime.hems_last_phase_change')) | default(0) }}
+
+    elapsed: >
+      {{ now().timestamp() - last_switch }}
 
   sequence:
 
-    # Nur während des Ladens umschalten
+    ###############################################################
+    # Cooldown nach Phasenwechsel
+    ###############################################################
+
+    - if:
+        - condition: template
+          value_template: "{{ elapsed < cooldown }}"
+      then:
+        - action: script.hems_log
+          data:
+            message: >
+              PhaseManager | Cooldown aktiv ({{ elapsed|int }}s)
+        - stop: "Cooldown aktiv"
+
+    ###############################################################
+    # Wechsel auf 3 Phasen
+    ###############################################################
+
     - if:
 
         - condition: template
-          value_template: "{{ charging }}"
+          value_template: >
+            {{
+              phase == 1 and
+              current >= 16 and
+              delta > 500
+            }}
 
       then:
 
-        # Genug Leistung -> 3-phasig
-        - if:
+        - action: script.hems_log
+          data:
+            message: >
+              PhaseManager | Wechsel auf 3 Phasen
 
-            - condition: template
-              value_template: >
-                {{ available_power >= switch_power }}
+        - service: select.select_option
+          target:
+            entity_id: select.goe_082888_psm
+          data:
+            option: "1"
 
-          then:
+        - service: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.hems_last_phase_change
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-            - action: script.hems_phase_three
+        - stop: "Auf 3 Phasen gewechselt"
 
-          else:
+    ###############################################################
+    # Wechsel zurück auf 1 Phase
+    ###############################################################
 
-            - action: script.hems_phase_single
-################################################################################
-# CURRENT PHASE
-################################################################################
+    - if:
 
-hems_phase_current:
+        - condition: template
+          value_template: >
+            {{
+              phase == 3 and
+              current <= 6 and
+              delta < -500
+            }}
 
-  alias: HEMS - Read Current Phase
+      then:
 
-  mode: single
+        - action: script.hems_log
+          data:
+            message: >
+              PhaseManager | Wechsel auf 1 Phase
 
-  sequence:
+        - service: select.select_option
+          target:
+            entity_id: select.goe_082888_psm
+          data:
+            option: "2"
+
+        - service: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.hems_last_phase_change
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+        - stop: "Auf 1 Phase gewechselt"
+
+    ###############################################################
+    # Keine Umschaltung erforderlich
+    ###############################################################
 
     - action: script.hems_log
       data:
         message: >
-          Current phase mode:
-          {{ states('select.goe_082888_psm') }}
+          PhaseManager | Keine Phasenumschaltung notwendig
