@@ -2,7 +2,7 @@
 #
 # HEMS - Home Energy Management System
 #
-# Version : 0.2.0-alpha
+# Version : 0.2.0-beta
 #
 # Datei : controller.yaml
 #
@@ -21,12 +21,41 @@ hems_controller:
   sequence:
 
     ###########################################################################
-    # Logging
+    # Controller started
     ###########################################################################
 
     - action: script.hems_log
       data:
         message: "Controller cycle started"
+
+    ###########################################################################
+    # Debounce
+    ###########################################################################
+
+    - variables:
+
+        debounce_time: 10
+
+        last_run: >
+          {% set ts = as_timestamp(states('input_datetime.hems_last_controller_run')) %}
+          {{ ts if ts is not none else 0 }}
+
+        elapsed: >
+          {{ now().timestamp() - last_run }}
+
+    - if:
+
+        - condition: template
+          value_template: "{{ elapsed < debounce_time }}"
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Controller skipped (Debounce {{ elapsed | round(1) }} s)
+
+        - stop: Debounce active
 
     ###########################################################################
     # HEMS enabled?
@@ -100,8 +129,24 @@ hems_controller:
 
         - action: script.hems_stop_manager
 
+      else:
+
+        - action: script.hems_log
+          data:
+            message: "Charging not active"
+
     ###########################################################################
-    # End
+    # Store last controller run
+    ###########################################################################
+
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.hems_last_controller_run
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    ###########################################################################
+    # Finished
     ###########################################################################
 
     - action: script.hems_log
