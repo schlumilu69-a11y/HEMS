@@ -1,0 +1,147 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+# Version : 0.2.0-alpha
+#
+# Datei : charging.yaml
+#
+################################################################################
+
+################################################################################
+# CHARGE START
+################################################################################
+
+hems_charge_start:
+
+  alias: HEMS - Charge Start
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Starting charging"
+
+    # Wallbox freigeben
+    - action: number.set_value
+      target:
+        entity_id: number.goe_082888_frc
+      data:
+        value: 2
+
+################################################################################
+# CHARGE STOP
+################################################################################
+
+hems_charge_stop:
+
+  alias: HEMS - Charge Stop
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Stopping charging"
+
+    # Wallbox stoppen
+    - action: number.set_value
+      target:
+        entity_id: number.goe_082888_frc
+      data:
+        value: 1
+
+################################################################################
+# CHARGE PAUSE
+################################################################################
+
+hems_charge_pause:
+
+  alias: HEMS - Charge Pause
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Pausing charging"
+
+    - action: number.set_value
+      target:
+        entity_id: number.goe_082888_frc
+      data:
+        value: 0
+
+################################################################################
+# CHARGE RESUME
+################################################################################
+
+hems_charge_resume:
+
+  alias: HEMS - Charge Resume
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Resuming charging"
+
+    - action: number.set_value
+      target:
+        entity_id: number.goe_082888_frc
+      data:
+        value: 2
+
+################################################################################
+# SET CHARGING CURRENT
+################################################################################
+
+hems_current_set:
+
+  alias: HEMS - Set Current
+
+  mode: restart
+
+  fields:
+
+    ampere:
+      description: Charging current in A
+
+  sequence:
+
+    - variables:
+
+        current: >
+          {{ ampere | int }}
+
+        min_current: >
+          {{ states('input_number.hems_min_ampere') | int(6) }}
+
+        max_current: >
+          {{ states('input_number.hems_max_ampere') | int(16) }}
+
+        target_current: >
+          {% if current < min_current %}
+            {{ min_current }}
+          {% elif current > max_current %}
+            {{ max_current }}
+          {% else %}
+            {{ current }}
+          {% endif %}
+
+    - action: script.hems_log
+      data:
+        message: >
+          Setting charging current to {{ target_current }} A
+
+    - action: number.set_value
+      target:
+        entity_id: number.goe_082888_amp
+      data:
+        value: "{{ target_current }}"
