@@ -23,3 +23,12 @@ hems_last_current_change:
   name: Letzte Stromänderung
   has_date: true
   has_time: true
+
+################################################################################
+# LAST CURRENT CHANGE
+################################################################################
+
+hems_last_current_change:
+  name: HEMS Last Current Change
+  has_date: true
+  has_time: true
