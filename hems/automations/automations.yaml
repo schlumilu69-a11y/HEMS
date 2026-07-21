@@ -1,27 +1,99 @@
-###############################################################################
+################################################################################
 #
 # HEMS - Home Energy Management System
 #
-# Version : 0.1.1-alpha
+# Version : 0.2.0-alpha
 #
 # Datei : automations.yaml
 #
 ################################################################################
 
-- id: hems_controller
+################################################################################
+# CONTROLLER SCHEDULER
+################################################################################
 
-  alias: HEMS - Controller
+- id: hems_controller_scheduler
+  alias: HEMS - Controller Scheduler
 
-  description: >
-    Startet zyklisch den HEMS Controller.
+  triggers:
 
-  mode: single
-
-  trigger:
+    ###########################################################################
+    # Zyklischer Aufruf
+    ###########################################################################
 
     - trigger: time_pattern
       seconds: "/30"
 
-  action:
+    ###########################################################################
+    # HEMS aktiviert/deaktiviert
+    ###########################################################################
+
+    - trigger: state
+      entity_id: input_boolean.hems_enabled
+
+    ###########################################################################
+    # Fahrzeug verbunden/getrennt
+    ###########################################################################
+
+    - trigger: state
+      entity_id: binary_sensor.hems_vehicle_connected
+
+    ###########################################################################
+    # Ladestatus geändert
+    ###########################################################################
+
+    - trigger: state
+      entity_id: binary_sensor.hems_charging_active
+
+  conditions: []
+
+  actions:
 
     - action: script.hems_controller
+
+  mode: single
+
+################################################################################
+# PHASE CHANGE DELAY
+################################################################################
+
+- id: hems_phase_change_delay
+  alias: HEMS - Phase Change Delay
+
+  triggers:
+
+    - trigger: state
+      entity_id: select.goe_082888_psm
+
+  conditions: []
+
+  actions:
+
+    - action: script.hems_log
+      data:
+        message: >
+          Phase changed to {{ states('select.goe_082888_psm') }}
+
+  mode: restart
+
+################################################################################
+# DEBUG STARTUP
+################################################################################
+
+- id: hems_startup
+
+  alias: HEMS - Startup
+
+  triggers:
+
+    - trigger: homeassistant
+      event: start
+
+  actions:
+
+    - action: script.hems_log
+      data:
+        message: >
+          HEMS successfully started.
+
+  mode: single
