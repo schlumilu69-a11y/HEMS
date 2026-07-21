@@ -1,0 +1,129 @@
+################################################################################
+# HEMS VEHICLE MANAGER V2
+################################################################################
+
+hems_vehicle_manager:
+
+  alias: HEMS - Vehicle Manager
+  description: Lädt das Fahrzeugprofil für das aktuell ausgewählte Fahrzeug.
+  mode: single
+
+  sequence:
+
+    ###########################################################################
+    # Fahrzeug auswählen
+    ###########################################################################
+
+    - choose:
+
+        #######################################################################
+        # SKODA ENYAQ
+        #######################################################################
+
+        - conditions:
+            - condition: state
+              entity_id: input_select.hems_vehicle
+              state: "Skoda Enyaq"
+
+          sequence:
+
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.hems_phase_switch_allowed
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.hems_vehicle_min_current
+              data:
+                value: 6
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.hems_vehicle_max_current
+              data:
+                value: 16
+
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.hems_vehicle_phase_mode
+              data:
+                option: "Auto"
+
+            - service: logbook.log
+              data:
+                name: HEMS
+                message: "Fahrzeugprofil 'Skoda Enyaq' geladen."
+                entity_id: input_select.hems_vehicle
+
+        #######################################################################
+        # TESLA MODEL Y
+        #######################################################################
+
+        - conditions:
+            - condition: state
+              entity_id: input_select.hems_vehicle
+              state: "Tesla Model Y"
+
+          sequence:
+
+            - service: input_boolean.turn_off
+              target:
+                entity_id: input_boolean.hems_phase_switch_allowed
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.hems_vehicle_min_current
+              data:
+                value: 5
+
+            - service: input_number.set_value
+              target:
+                entity_id: input_number.hems_vehicle_max_current
+              data:
+                value: 16
+
+            - service: input_select.select_option
+              target:
+                entity_id: input_select.hems_vehicle_phase_mode
+              data:
+                option: "3"
+
+            - service: logbook.log
+              data:
+                name: HEMS
+                message: "Fahrzeugprofil 'Tesla Model Y' geladen."
+                entity_id: input_select.hems_vehicle
+
+    ###########################################################################
+    # Kein Fahrzeug ausgewählt
+    ###########################################################################
+
+      default:
+
+        - service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.hems_phase_switch_allowed
+
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.hems_vehicle_min_current
+          data:
+            value: 6
+
+        - service: input_number.set_value
+          target:
+            entity_id: input_number.hems_vehicle_max_current
+          data:
+            value: 16
+
+        - service: input_select.select_option
+          target:
+            entity_id: input_select.hems_vehicle_phase_mode
+          data:
+            option: "Auto"
+
+        - service: logbook.log
+          data:
+            name: HEMS
+            message: "Kein Fahrzeugprofil aktiv."
+            entity_id: input_select.hems_vehicle
