@@ -141,6 +141,11 @@ hems_current_set:
           Setting charging current to {{ target_current }} A
 
     - action: number.set_value
+     - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.hems_last_current_change
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
       target:
         entity_id: number.goe_082888_amp
       data:
