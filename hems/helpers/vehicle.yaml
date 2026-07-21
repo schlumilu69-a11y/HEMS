@@ -1,0 +1,65 @@
+################################################################################
+# VEHICLE CONFIGURATION
+################################################################################
+
+input_select:
+
+  hems_vehicle:
+    name: HEMS Fahrzeug
+    icon: mdi:car-electric
+    options:
+      - None
+      - Skoda
+      - Tesla
+    initial: None
+
+################################################################################
+# VEHICLE SETTINGS
+################################################################################
+
+input_boolean:
+
+  hems_phase_switch_allowed:
+    name: HEMS Phasenumschaltung erlaubt
+    icon: mdi:swap-horizontal
+
+################################################################################
+# CURRENT LIMITS
+################################################################################
+
+input_number:
+
+  hems_vehicle_min_current:
+    name: HEMS Mindestladestrom
+    icon: mdi:current-ac
+    min: 5
+    max: 16
+    step: 1
+    unit_of_measurement: A
+    mode: box
+    initial: 6
+
+  hems_vehicle_max_current:
+    name: HEMS Maximaler Ladestrom
+    icon: mdi:current-ac
+    min: 6
+    max: 16
+    step: 1
+    unit_of_measurement: A
+    mode: box
+    initial: 16
+
+################################################################################
+# PHASE CONFIGURATION
+################################################################################
+
+input_select:
+
+  hems_vehicle_phase_mode:
+    name: HEMS Phasenmodus
+    icon: mdi:lightning-bolt
+    options:
+      - Auto
+      - 1
+      - 3
+    initial: Auto
