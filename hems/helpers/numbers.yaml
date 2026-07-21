@@ -126,3 +126,49 @@ hems_current_step:
   max: 6
   step: 1
   initial: 2
+
+################################################################################
+# HEMS CURRENT STEP
+################################################################################
+
+hems_current_step:
+  name: HEMS Current Step
+  icon: mdi:current-ac
+
+  min: 1
+  max: 3
+  step: 1
+
+  initial: 1
+
+################################################################################
+# HEMS DEADBAND
+################################################################################
+
+hems_deadband:
+  name: HEMS Deadband
+  icon: mdi:chart-bell-curve
+
+  min: 50
+  max: 500
+  step: 25
+
+  unit_of_measurement: W
+
+  initial: 150
+
+################################################################################
+# HEMS CURRENT HOLD TIME
+################################################################################
+
+hems_current_hold_time:
+  name: HEMS Current Hold Time
+  icon: mdi:timer-outline
+
+  min: 0
+  max: 300
+  step: 30
+
+  unit_of_measurement: s
+
+  initial: 120
