@@ -67,33 +67,24 @@ hems_power_manager:
 
     current: >
       {{ states('sensor.hems_charge_current') | int(6) }}
-
+  
     delta: >
       {{ states('sensor.hems_power_delta') | float(0) }}
-
+  
+    deadband: >
+      {{ states('input_number.hems_deadband') | float(150) }}
+  
     step: >
-      {{ states('input_number.hems_current_step') | int(2) }}
-
-    amp_change: >
-      {{ (delta / 230) | round(0) | int }}
-
-    target_current: >
-
-      {% set new = current + amp_change %}
-
-      {% set min = states('input_number.hems_min_ampere')|int %}
-      {% set max = states('input_number.hems_max_ampere')|int %}
-
-      {% if new < min %}
-        {{ min }}
-
-      {% elif new > max %}
-        {{ max }}
-
-      {% else %}
-        {{ new }}
-
-      {% endif %}
+      {{ states('input_number.hems_current_step') | int(1) }}
+  
+    hold_time: >
+      {{ states('input_number.hems_current_hold_time') | int(120) }}
+  
+    last_change: >
+      {{ as_timestamp(states('input_datetime.hems_last_current_change')) | default(0) }}
+  
+    elapsed: >
+      {{ now().timestamp() - last_change }}
 
   sequence:
 
