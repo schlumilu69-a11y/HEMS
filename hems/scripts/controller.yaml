@@ -1,15 +1,5 @@
 ################################################################################
-#
-# HEMS - Home Energy Management System
-#
-# Version : 0.2.0-beta
-#
-# Datei : controller.yaml
-#
-################################################################################
-
-################################################################################
-# MAIN CONTROLLER
+# HEMS CONTROLLER V3
 ################################################################################
 
 hems_controller:
@@ -21,90 +11,16 @@ hems_controller:
   sequence:
 
     ###########################################################################
-    # Controller started
-    ###########################################################################
-
-    - action: script.hems_log
-      data:
-        message: "Controller cycle started"
-
-    ###########################################################################
-    # Debounce
-    ###########################################################################
-
-    - variables:
-
-        debounce_time: 10
-
-        last_run: >
-          {% set ts = as_timestamp(states('input_datetime.hems_last_controller_run')) %}
-          {{ ts if ts is not none else 0 }}
-
-        elapsed: >
-          {{ now().timestamp() - last_run }}
-
-    - if:
-
-        - condition: template
-          value_template: "{{ elapsed < debounce_time }}"
-
-      then:
-
-        - action: script.hems_log
-          data:
-            message: >
-              Controller skipped (Debounce {{ elapsed | round(1) }} s)
-
-        - stop: Debounce active
-
-    ###########################################################################
-    # HEMS enabled?
-    ###########################################################################
-
-    - if:
-
-        - condition: state
-          entity_id: binary_sensor.hems_enabled
-          state: "off"
-
-      then:
-
-        - action: script.hems_log
-          data:
-            message: "HEMS disabled"
-
-        - stop: HEMS disabled
-
-    ###########################################################################
-    # Vehicle connected?
-    ###########################################################################
-
-    - if:
-
-        - condition: state
-          entity_id: binary_sensor.hems_vehicle_connected
-          state: "off"
-
-      then:
-
-        - action: script.hems_log
-          data:
-            message: "No vehicle connected"
-
-        - stop: No vehicle connected
-
-    ###########################################################################
-    # Start Manager
+    # Startbedingungen prüfen
     ###########################################################################
 
     - action: script.hems_start_manager
 
     ###########################################################################
-    # Continue only while charging
+    # Nur wenn geladen wird
     ###########################################################################
 
     - if:
-
         - condition: state
           entity_id: binary_sensor.hems_charging_active
           state: "on"
@@ -112,43 +28,29 @@ hems_controller:
       then:
 
         #######################################################################
-        # Phase Manager
-        #######################################################################
-
-        - action: script.hems_phase_manager
-
-        #######################################################################
-        # Power Manager
+        # 1. Leistung regeln
         #######################################################################
 
         - action: script.hems_power_manager
 
         #######################################################################
-        # Stop Manager
+        # 2. Danach ggf. Phase wechseln
+        #######################################################################
+
+        - action: script.hems_phase_manager
+
+        #######################################################################
+        # 3. Prüfen ob gestoppt werden muss
         #######################################################################
 
         - action: script.hems_stop_manager
 
-      else:
-
-        - action: script.hems_log
-          data:
-            message: "Charging not active"
-
     ###########################################################################
-    # Store last controller run
+    # Controller-Zeit aktualisieren
     ###########################################################################
 
-    - action: input_datetime.set_datetime
+    - service: input_datetime.set_datetime
       target:
         entity_id: input_datetime.hems_last_controller_run
       data:
         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
-
-    ###########################################################################
-    # Finished
-    ###########################################################################
-
-    - action: script.hems_log
-      data:
-        message: "Controller cycle finished"
