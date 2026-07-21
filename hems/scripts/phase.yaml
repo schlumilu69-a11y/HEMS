@@ -1,5 +1,5 @@
 ################################################################################
-# PHASE MANAGER V2
+# PHASE MANAGER V3
 ################################################################################
 
 hems_phase_manager:
@@ -17,44 +17,46 @@ hems_phase_manager:
       {{ states('sensor.hems_power_delta') | float(0) }}
 
     phase: >
-      {{ states('sensor.hems_current_phase') | int(1) }}
+      {{ states('select.goe_082888_psm') | int(1) }}
 
     cooldown: 120
 
-    last_switch: >
+    last_change: >
       {{ as_timestamp(states('input_datetime.hems_last_phase_change')) | default(0) }}
 
     elapsed: >
-      {{ now().timestamp() - last_switch }}
+      {{ now().timestamp() - last_change }}
 
   sequence:
 
-    ###############################################################
-    # Cooldown nach Phasenwechsel
-    ###############################################################
+    ###########################################################################
+    # Cooldown
+    ###########################################################################
 
     - if:
         - condition: template
           value_template: "{{ elapsed < cooldown }}"
       then:
+
         - action: script.hems_log
           data:
             message: >
-              PhaseManager | Cooldown aktiv ({{ elapsed|int }}s)
-        - stop: "Cooldown aktiv"
+              PhaseManager |
+              Cooldown aktiv ({{ elapsed|int }}s)
 
-    ###############################################################
-    # Wechsel auf 3 Phasen
-    ###############################################################
+        - stop: Cooldown aktiv
+
+    ###########################################################################
+    # 1 -> 3 Phasen
+    ###########################################################################
 
     - if:
-
         - condition: template
           value_template: >
             {{
-              phase == 1 and
-              current >= 16 and
-              delta > 500
+              phase == 1
+              and current >= 16
+              and delta > 800
             }}
 
       then:
@@ -62,42 +64,8 @@ hems_phase_manager:
         - action: script.hems_log
           data:
             message: >
-              PhaseManager | Wechsel auf 3 Phasen
-
-        - service: select.select_option
-          target:
-            entity_id: select.goe_082888_psm
-          data:
-            option: "1"
-
-        - service: input_datetime.set_datetime
-          target:
-            entity_id: input_datetime.hems_last_phase_change
-          data:
-            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
-
-        - stop: "Auf 3 Phasen gewechselt"
-
-    ###############################################################
-    # Wechsel zurück auf 1 Phase
-    ###############################################################
-
-    - if:
-
-        - condition: template
-          value_template: >
-            {{
-              phase == 3 and
-              current <= 6 and
-              delta < -500
-            }}
-
-      then:
-
-        - action: script.hems_log
-          data:
-            message: >
-              PhaseManager | Wechsel auf 1 Phase
+              PhaseManager |
+              Wechsel auf 3 Phasen
 
         - service: select.select_option
           target:
@@ -111,13 +79,49 @@ hems_phase_manager:
           data:
             datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
-        - stop: "Auf 1 Phase gewechselt"
+        - stop: Wechsel auf 3 Phasen abgeschlossen
 
-    ###############################################################
-    # Keine Umschaltung erforderlich
-    ###############################################################
+    ###########################################################################
+    # 3 -> 1 Phase
+    ###########################################################################
+
+    - if:
+        - condition: template
+          value_template: >
+            {{
+              phase == 2
+              and current <= 6
+              and delta < -500
+            }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              PhaseManager |
+              Wechsel auf 1 Phase
+
+        - service: select.select_option
+          target:
+            entity_id: select.goe_082888_psm
+          data:
+            option: "1"
+
+        - service: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.hems_last_phase_change
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+        - stop: Wechsel auf 1 Phase abgeschlossen
+
+    ###########################################################################
+    # Keine Umschaltung notwendig
+    ###########################################################################
 
     - action: script.hems_log
       data:
         message: >
-          PhaseManager | Keine Phasenumschaltung notwendig
+          PhaseManager |
+          Keine Phasenumschaltung erforderlich
