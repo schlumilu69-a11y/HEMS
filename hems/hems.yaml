@@ -12,28 +12,28 @@
 # Helpers
 ################################################################################
 
-input_boolean: !include hems/helpers/booleans.yaml
+input_boolean: !include helpers/booleans.yaml
 
-input_number: !include hems/helpers/numbers.yaml
+input_number: !include helpers/numbers.yaml
 
-input_datetime: !include hems/helpers/datetime.yaml
+input_datetime: !include helpers/datetime.yaml
 
-input_select: !include hems/helpers/select.yaml
+input_select: !include helpers/select.yaml
 
 ################################################################################
 # Templates
 ################################################################################
 
-template: !include hems/templates/templates.yaml
+template: !include templates/templates.yaml
 
 ################################################################################
 # Scripts
 ################################################################################
 
-script: !include hems/scripts/scripts.yaml
+script: !include scripts/scripts.yaml
 
 ################################################################################
 # Automations
 ################################################################################
 
-automation: !include hems/automations/automations.yaml
+automation: !include automations/automations.yaml
