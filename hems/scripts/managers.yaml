@@ -67,24 +67,51 @@ hems_power_manager:
 
     current: >
       {{ states('sensor.hems_charge_current') | int(6) }}
-  
+
     delta: >
       {{ states('sensor.hems_power_delta') | float(0) }}
-  
+
     deadband: >
       {{ states('input_number.hems_deadband') | float(150) }}
-  
+
     step: >
       {{ states('input_number.hems_current_step') | int(1) }}
-  
+
+    min_current: >
+      {{ states('input_number.hems_min_current') | int(6) }}
+
+    max_current: >
+      {{ states('input_number.hems_max_current') | int(16) }}
+
     hold_time: >
       {{ states('input_number.hems_current_hold_time') | int(120) }}
-  
+
     last_change: >
       {{ as_timestamp(states('input_datetime.hems_last_current_change')) | default(0) }}
-  
+
     elapsed: >
       {{ now().timestamp() - last_change }}
+
+    target_current: >
+
+      {% set c = current | int %}
+      {% set d = delta | float %}
+      {% set db = deadband | float %}
+      {% set s = step | int %}
+
+      {% if elapsed < hold_time %}
+        {{ c }}
+
+      {% elif d > db %}
+        {{ [c + s, max_current] | min }}
+
+      {% elif d < -db %}
+        {{ [c - s, min_current] | max }}
+
+      {% else %}
+        {{ c }}
+
+      {% endif %}
 
   sequence:
 
@@ -96,10 +123,29 @@ hems_power_manager:
           Current={{ current }}A
           Target={{ target_current }}A
 
-    - action: script.hems_current_set
-      data:
-        ampere: "{{ target_current }}"
+    - if:
 
+        - condition: template
+          value_template: >
+            {{ target_current | int != current | int }}
+
+      then:
+
+        - action: script.hems_current_set
+          data:
+            ampere: "{{ target_current }}"
+
+        - action: script.hems_log
+          data:
+            message: >
+              Current changed to {{ target_current }} A
+
+      else:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Current unchanged
 ################################################################################
 # STOP MANAGER
 ################################################################################
