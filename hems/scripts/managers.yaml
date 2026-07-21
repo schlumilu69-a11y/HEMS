@@ -54,7 +54,7 @@ hems_start_manager:
         - action: script.hems_charge_start
 
 ################################################################################
-# POWER MANAGER
+# POWER MANAGER V3
 ################################################################################
 
 hems_power_manager:
@@ -71,42 +71,46 @@ hems_power_manager:
     delta: >
       {{ states('sensor.hems_power_delta') | float(0) }}
 
-    deadband: >
-      {{ states('input_number.hems_deadband') | float(150) }}
-
-    step: >
-      {{ states('input_number.hems_current_step') | int(1) }}
-
     min_current: >
       {{ states('input_number.hems_min_current') | int(6) }}
 
     max_current: >
       {{ states('input_number.hems_max_current') | int(16) }}
 
-    hold_time: >
-      {{ states('input_number.hems_current_hold_time') | int(120) }}
-
-    last_change: >
-      {{ as_timestamp(states('input_datetime.hems_last_current_change')) | default(0) }}
-
-    elapsed: >
-      {{ now().timestamp() - last_change }}
-
     target_current: >
 
-      {% set c = current | int %}
-      {% set d = delta | float %}
-      {% set db = deadband | float %}
-      {% set s = step | int %}
+      {% set c = current %}
+      {% set d = delta %}
 
-      {% if elapsed < hold_time %}
+      {# ----------------------------- #}
+      {# DEAD BAND                    #}
+      {# ----------------------------- #}
+
+      {% if d > -300 and d < 300 %}
         {{ c }}
 
-      {% elif d > db %}
-        {{ [c + s, max_current] | min }}
+      {# ----------------------------- #}
+      {# MEHR PV -> schneller erhöhen #}
+      {# ----------------------------- #}
 
-      {% elif d < -db %}
-        {{ [c - s, min_current] | max }}
+      {% elif d >= 2000 %}
+        {{ [c + 3, max_current] | min }}
+
+      {% elif d >= 1000 %}
+        {{ [c + 2, max_current] | min }}
+
+      {% elif d >= 300 %}
+        {{ [c + 1, max_current] | min }}
+
+      {# ----------------------------- #}
+      {# NETZBEZUG -> langsamer senken#}
+      {# ----------------------------- #}
+
+      {% elif d <= -1500 %}
+        {{ [c - 2, min_current] | max }}
+
+      {% elif d <= -300 %}
+        {{ [c - 1, min_current] | max }}
 
       {% else %}
         {{ c }}
@@ -118,9 +122,9 @@ hems_power_manager:
     - action: script.hems_log
       data:
         message: >
-          Power Manager:
-          Delta={{ delta }}W
-          Current={{ current }}A
+          PowerManager |
+          Delta={{ delta }}W |
+          Current={{ current }}A |
           Target={{ target_current }}A
 
     - if:
@@ -135,17 +139,25 @@ hems_power_manager:
           data:
             ampere: "{{ target_current }}"
 
+        - service: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.hems_last_current_change
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
         - action: script.hems_log
           data:
             message: >
-              Current changed to {{ target_current }} A
+              PowerManager |
+              Current changed from {{ current }}A to {{ target_current }}A
 
       else:
 
         - action: script.hems_log
           data:
             message: >
-              Current unchanged
+              PowerManager |
+              No current change required
 ################################################################################
 # STOP MANAGER
 ################################################################################
