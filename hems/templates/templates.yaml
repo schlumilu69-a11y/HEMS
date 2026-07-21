@@ -2,17 +2,21 @@
 #
 # HEMS - Home Energy Management System
 #
-# Version : 0.1.0-alpha
+# Version : 0.2.0-alpha
 #
 # Datei : templates.yaml
 #
 ################################################################################
 
-###############################################################################
-# SENSORS
-###############################################################################
+################################################################################
+# Sensoren
+################################################################################
 
 - sensor:
+
+###############################################################################
+# Grid Power
+###############################################################################
 
     - name: HEMS Grid Power
       unique_id: hems_grid_power
@@ -22,6 +26,10 @@
       state: >
         {{ states('sensor.pv_charge_grid_power') | float(0) }}
 
+###############################################################################
+# Charging Power
+###############################################################################
+
     - name: HEMS Charging Power
       unique_id: hems_charging_power
       unit_of_measurement: W
@@ -30,18 +38,116 @@
       state: >
         {{ states('sensor.goe_082888_nrg_11') | float(0) }}
 
-    # weitere Sensoren ...
+###############################################################################
+# Charge Current
+###############################################################################
+
+    - name: HEMS Charge Current
+      unique_id: hems_charge_current
+      unit_of_measurement: A
+      device_class: current
+      state_class: measurement
+      state: >
+        {{ states('number.goe_082888_amp') | float(0) }}
 
 ###############################################################################
-# BINARY SENSORS
+# PV Power (Platzhalter)
 ###############################################################################
+
+    - name: HEMS PV Power
+      unique_id: hems_pv_power
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
+      state: >
+        0
+
+###############################################################################
+# House Power (Platzhalter)
+###############################################################################
+
+    - name: HEMS House Power
+      unique_id: hems_house_power
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
+      state: >
+        0
+
+###############################################################################
+# Battery Power (Platzhalter)
+###############################################################################
+
+    - name: HEMS Battery Power
+      unique_id: hems_battery_power
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
+      state: >
+        0
+
+###############################################################################
+# Available Power
+###############################################################################
+
+    - name: HEMS Available Power
+      unique_id: hems_available_power
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
+      state: >
+        {% set grid = states('sensor.hems_grid_power') | float(0) %}
+        {{ (-grid) | round(0) }}
+
+###############################################################################
+# Power Delta
+###############################################################################
+
+    - name: HEMS Power Delta
+      unique_id: hems_power_delta
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
+      state: >
+        {% set target = states('input_number.hems_target_grid_import') | float(300) %}
+        {% set grid = states('sensor.hems_grid_power') | float(0) %}
+        {{ (target - grid) | round(0) }}
+
+###############################################################################
+# Status
+###############################################################################
+
+    - name: HEMS Status
+      unique_id: hems_status
+      state: >
+        {% if is_state('input_boolean.hems_enabled','off') %}
+          Disabled
+        {% elif is_state('binary_sensor.hems_vehicle_connected','off') %}
+          Waiting for vehicle
+        {% elif is_state('binary_sensor.hems_charging_active','on') %}
+          Charging
+        {% else %}
+          Ready
+        {% endif %}
+
+################################################################################
+# Binary Sensoren
+################################################################################
 
 - binary_sensor:
+
+###############################################################################
+# Enabled
+###############################################################################
 
     - name: HEMS Enabled
       unique_id: hems_enabled
       state: >
         {{ is_state('input_boolean.hems_enabled','on') }}
+
+###############################################################################
+# Vehicle Connected
+###############################################################################
 
     - name: HEMS Vehicle Connected
       unique_id: hems_vehicle_connected
@@ -49,4 +155,30 @@
       state: >
         {{ is_state('binary_sensor.goe_082888_car_0','on') }}
 
-    # weitere Binary Sensoren ...
+###############################################################################
+# Charging Active
+###############################################################################
+
+    - name: HEMS Charging Active
+      unique_id: hems_charging_active
+      device_class: battery_charging
+      state: >
+        {{ states('sensor.hems_charging_power') | float(0) > 100 }}
+
+###############################################################################
+# Grid Import
+###############################################################################
+
+    - name: HEMS Grid Import
+      unique_id: hems_grid_import
+      state: >
+        {{ states('sensor.hems_grid_power') | float(0) > 0 }}
+
+###############################################################################
+# Grid Export
+###############################################################################
+
+    - name: HEMS Grid Export
+      unique_id: hems_grid_export
+      state: >
+        {{ states('sensor.hems_grid_power') | float(0) < 0 }}
