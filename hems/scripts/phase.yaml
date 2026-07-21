@@ -97,3 +97,20 @@ hems_phase_auto:
           else:
 
             - action: script.hems_phase_single
+################################################################################
+# CURRENT PHASE
+################################################################################
+
+hems_phase_current:
+
+  alias: HEMS - Read Current Phase
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: >
+          Current phase mode:
+          {{ states('select.goe_082888_psm') }}
