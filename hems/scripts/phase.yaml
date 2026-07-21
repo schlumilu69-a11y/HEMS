@@ -1,0 +1,99 @@
+################################################################################
+#
+# HEMS - Home Energy Management System
+#
+# Version : 0.2.0-alpha
+#
+# Datei : phase.yaml
+#
+################################################################################
+
+################################################################################
+# SINGLE PHASE
+################################################################################
+
+hems_phase_single:
+
+  alias: HEMS - Switch to 1 Phase
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Switching Wallbox to 1-phase"
+
+    - action: select.select_option
+      target:
+        entity_id: select.goe_082888_psm
+      data:
+        option: "1-phase"
+
+################################################################################
+# THREE PHASE
+################################################################################
+
+hems_phase_three:
+
+  alias: HEMS - Switch to 3 Phase
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Switching Wallbox to 3-phase"
+
+    - action: select.select_option
+      target:
+        entity_id: select.goe_082888_psm
+      data:
+        option: "3-phase"
+
+################################################################################
+# AUTO PHASE
+################################################################################
+
+hems_phase_auto:
+
+  alias: HEMS - Automatic Phase Selection
+
+  mode: restart
+
+  variables:
+
+    available_power: >
+      {{ states('sensor.hems_available_power') | float(0) }}
+
+    switch_power: >
+      {{ states('input_number.hems_phase_switch_power') | float(4200) }}
+
+    charging: >
+      {{ is_state('binary_sensor.hems_charging_active','on') }}
+
+  sequence:
+
+    # Nur während des Ladens umschalten
+    - if:
+
+        - condition: template
+          value_template: "{{ charging }}"
+
+      then:
+
+        # Genug Leistung -> 3-phasig
+        - if:
+
+            - condition: template
+              value_template: >
+                {{ available_power >= switch_power }}
+
+          then:
+
+            - action: script.hems_phase_three
+
+          else:
+
+            - action: script.hems_phase_single
