@@ -36,4 +36,4 @@ script: !include_dir_merge_named scripts
 # Automations
 ################################################################################
 
-automation: !include automations/automations.yaml
+automation: !include_dir_merge_list automations
