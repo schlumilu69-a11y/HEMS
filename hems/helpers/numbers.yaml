@@ -119,3 +119,10 @@ hems_deadband:
   step: 50
   initial: 150
   unit_of_measurement: W
+
+hems_current_step:
+  name: HEMS Current Step
+  min: 1
+  max: 6
+  step: 1
+  initial: 2
