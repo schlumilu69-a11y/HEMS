@@ -32,3 +32,12 @@ hems_last_current_change:
   name: HEMS Last Current Change
   has_date: true
   has_time: true
+  
+################################################################################
+# LAST CONTROLLER RUN
+################################################################################
+
+hems_last_controller_run:
+  name: HEMS Last Controller Run
+  has_date: true
+  has_time: true
