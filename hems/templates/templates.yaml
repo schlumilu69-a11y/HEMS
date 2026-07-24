@@ -130,6 +130,23 @@
           Ready
         {% endif %}
 
+###############################################################################
+# Power Manager
+###############################################################################
+
+    - name: HEMS Target Current
+    unique_id: hems_target_current
+    unit_of_measurement: A
+    state: >
+      {% set available = states('sensor.hems_available_power') | float(0) %}
+
+      {% set amp = available / 230 %}
+
+      {% set amp = [amp, states('input_number.hems_max_current')|float] | min %}
+      {% set amp = [amp, states('input_number.hems_min_current')|float] | max %}
+
+      {{ amp | round(0) }}
+
 ################################################################################
 # Binary Sensoren
 ################################################################################
@@ -183,19 +200,4 @@
       state: >
         {{ states('sensor.hems_grid_power') | float(0) < 0 }}
 
-###############################################################################
-# Power Manager
-###############################################################################
 
-    - name: HEMS Target Current
-    unique_id: hems_target_current
-    unit_of_measurement: A
-    state: >
-      {% set available = states('sensor.hems_available_power') | float(0) %}
-
-      {% set amp = available / 230 %}
-
-      {% set amp = [amp, states('input_number.hems_max_current')|float] | min %}
-      {% set amp = [amp, states('input_number.hems_min_current')|float] | max %}
-
-      {{ amp | round(0) }}
