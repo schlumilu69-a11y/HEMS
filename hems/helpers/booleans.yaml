@@ -31,3 +31,7 @@ hems_allow_battery_charging:
 hems_vehicle_priority:
   name: Fahrzeugpriorisierung aktiv
   icon: mdi:car-multiple
+
+hems_power_manager_enabled:
+  name: Power Manager aktiviert
+  icon: mdi:lightning-bolt
