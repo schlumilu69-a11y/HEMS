@@ -3,6 +3,7 @@
 # HEMS - Home Energy Management System
 #
 ################################################################################
+input_number: 
 
 hems_target_grid_power:
   name: Ziel Netzleistung
