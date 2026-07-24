@@ -2,206 +2,163 @@
 #
 # HEMS - Home Energy Management System
 #
-################################################################################
-input_number: 
-
-hems_target_grid_power:
-  name: Ziel Netzleistung
-  min: -5000
-  max: 5000
-  step: 50
-  unit_of_measurement: W
-  mode: box
-  initial: 300
-
-hems_power_reserve:
-  name: Leistungsreserve
-  min: 0
-  max: 3000
-  step: 50
-  unit_of_measurement: W
-  mode: box
-  initial: 200
-
-hems_min_ampere:
-  name: Minimaler Ladestrom
-  min: 6
-  max: 16
-  step: 1
-  unit_of_measurement: A
-  mode: slider
-  initial: 6
-
-hems_max_ampere:
-  name: Maximaler Ladestrom
-  min: 6
-  max: 16
-  step: 1
-  unit_of_measurement: A
-  mode: slider
-  initial: 16
-
-hems_phase_switch_up:
-  name: Umschaltung auf 3 Phasen
-  min: 3500
-  max: 11000
-  step: 100
-  unit_of_measurement: W
-  mode: box
-  initial: 4500
-
-hems_phase_switch_down:
-  name: Umschaltung auf 1 Phase
-  min: 1500
-  max: 9000
-  step: 100
-  unit_of_measurement: W
-  mode: box
-  initial: 3500
-
-hems_controller_interval:
-  name: Reglerintervall
-  min: 10
-  max: 120
-  step: 5
-  unit_of_measurement: s
-  mode: slider
-  initial: 30
-
-hems_min_runtime:
-  name: Mindestlaufzeit
-  min: 0
-  max: 1800
-  step: 30
-  unit_of_measurement: s
-  mode: box
-  initial: 300
-
-hems_restart_delay:
-  name: Neustartverzögerung
-  min: 0
-  max: 1800
-  step: 30
-  unit_of_measurement: s
-  mode: box
-
-hems_start_power:
-  name: Startleistung
-  min: 500
-  max: 5000
-  step: 100
-  unit_of_measurement: W
-  mode: box
-  initial: 1500
-
-hems_stop_power:
-  name: Stoppleistung
-  min: 0
-  max: 5000
-  step: 100
-  unit_of_measurement: W
-  mode: box
-  initial: 800
-
-hems_current_step:
-  name: Stromänderung je Zyklus
-  min: 1
-  max: 5
-  step: 1
-  initial: 2
-  mode: slider
-  unit_of_measurement: A
-  initial: 120
-
-hems_deadband:
-  name: Regel-Totzone
-  min: 0
-  max: 500
-  step: 50
-  initial: 150
-  unit_of_measurement: W
-
-hems_current_step:
-  name: HEMS Current Step
-  min: 1
-  max: 6
-  step: 1
-  initial: 2
-
-################################################################################
-# HEMS CURRENT STEP
+# helpers/numbers.yaml
+#
 ################################################################################
 
-hems_current_step:
-  name: HEMS Current Step
-  icon: mdi:current-ac
+input_number:
 
-  min: 1
-  max: 3
-  step: 1
+  ##############################################################################
+  # Controller
+  ##############################################################################
 
-  initial: 1
-
-################################################################################
-# HEMS DEADBAND
-################################################################################
-
-hems_deadband:
-  name: HEMS Deadband
-  icon: mdi:chart-bell-curve
-
-  min: 50
-  max: 500
-  step: 25
-
-  unit_of_measurement: W
-
-  initial: 150
-
-################################################################################
-# HEMS CURRENT HOLD TIME
-################################################################################
-
-hems_current_hold_time:
-  name: HEMS Current Hold Time
-  icon: mdi:timer-outline
-
-  min: 0
-  max: 300
-  step: 30
-
-  unit_of_measurement: s
-
-  initial: 120
-
-################################################################################
-# HEMS Power Manager
-################################################################################
-  
-hems_power_reserve:
-    name: Netzreserve
-    min: 0
-    max: 1000
+  hems_target_grid_power:
+    name: Ziel Netzleistung
+    min: -5000
+    max: 5000
     step: 50
     unit_of_measurement: W
+    mode: box
     initial: 300
 
-  hems_min_current:
+  hems_power_reserve:
+    name: Leistungsreserve
+    min: 0
+    max: 3000
+    step: 50
+    unit_of_measurement: W
+    mode: box
+    initial: 300
+
+  hems_controller_interval:
+    name: Reglerintervall
+    min: 10
+    max: 120
+    step: 5
+    unit_of_measurement: s
+    mode: slider
+    initial: 20
+
+  ##############################################################################
+  # Charging
+  ##############################################################################
+
+  hems_start_power:
+    name: Startleistung
+    min: 500
+    max: 5000
+    step: 100
+    unit_of_measurement: W
+    mode: box
+    initial: 1500
+
+  hems_stop_power:
+    name: Stoppleistung
+    min: 0
+    max: 5000
+    step: 100
+    unit_of_measurement: W
+    mode: box
+    initial: 800
+
+  hems_min_runtime:
+    name: Mindestlaufzeit
+    min: 0
+    max: 1800
+    step: 30
+    unit_of_measurement: s
+    mode: box
+    initial: 300
+
+  hems_restart_delay:
+    name: Neustartverzögerung
+    min: 0
+    max: 1800
+    step: 30
+    unit_of_measurement: s
+    mode: box
+    initial: 120
+
+  ##############################################################################
+  # Current
+  ##############################################################################
+
+  hems_min_ampere:
     name: Minimaler Ladestrom
     min: 6
     max: 16
     step: 1
+    unit_of_measurement: A
+    mode: slider
     initial: 6
 
-  hems_max_current:
+  hems_max_ampere:
     name: Maximaler Ladestrom
     min: 6
     max: 16
     step: 1
+    unit_of_measurement: A
+    mode: slider
     initial: 16
+
+  hems_current_step:
+    name: Stromänderung je Zyklus
+    min: 1
+    max: 3
+    step: 1
+    unit_of_measurement: A
+    mode: slider
+    initial: 1
 
   hems_last_current:
     name: Letzter Sollstrom
     min: 0
     max: 32
     step: 1
+    unit_of_measurement: A
+    mode: box
+    initial: 0
+
+  hems_current_hold_time:
+    name: Stromhaltezeit
+    min: 0
+    max: 300
+    step: 30
+    unit_of_measurement: s
+    mode: slider
+    initial: 120
+
+  ##############################################################################
+  # Phase Switching
+  ##############################################################################
+
+  hems_phase_switch_up:
+    name: Umschaltung auf 3 Phasen
+    min: 3500
+    max: 11000
+    step: 100
+    unit_of_measurement: W
+    mode: box
+    initial: 4500
+
+  hems_phase_switch_down:
+    name: Umschaltung auf 1 Phase
+    min: 1500
+    max: 9000
+    step: 100
+    unit_of_measurement: W
+    mode: box
+    initial: 3500
+
+  ##############################################################################
+  # Regulation
+  ##############################################################################
+
+  hems_deadband:
+    name: Regel-Totzone
+    min: 50
+    max: 500
+    step: 25
+    unit_of_measurement: W
+    mode: slider
+    initial: 150
