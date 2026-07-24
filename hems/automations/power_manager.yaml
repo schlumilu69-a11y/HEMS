@@ -1,0 +1,41 @@
+alias: HEMS Power Manager
+
+trigger:
+
+  - platform: time_pattern
+    seconds: "/20"
+
+condition:
+
+  - condition: state
+    entity_id: input_boolean.hems_power_manager_enabled
+    state: "on"
+
+action:
+
+  - variables:
+
+      target: >
+        {{ states('sensor.hems_target_current')|int }}
+
+      current: >
+        {{ states('input_number.hems_last_current')|int }}
+
+  - condition: template
+    value_template: >
+      {{ target != current }}
+
+  - service: script.hems_evbox_set_current
+
+    data:
+
+      current: "{{ target }}"
+
+  - service: input_number.set_value
+
+    target:
+      entity_id: input_number.hems_last_current
+
+    data:
+
+      value: "{{ target }}"
