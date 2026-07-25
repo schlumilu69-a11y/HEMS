@@ -1,5 +1,3 @@
-template:
-
   - sensor:
 
       - name: HEMS Target Current
