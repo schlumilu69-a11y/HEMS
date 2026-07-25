@@ -9,10 +9,13 @@ hems_evbox_set_current:
   sequence:
 
     - action: ocpp.set_charge_rate
-
       data:
-
         devid: 22052459
         conn_id: 1
+        limit_amps: "{{ current | int }}"
 
-        limit_amps: "{{ current|int }}"
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.hems_last_current
+      data:
+        value: "{{ current | int }}"
