@@ -1,0 +1,24 @@
+template:
+
+  - sensor:
+
+      - name: HEMS Target Current
+        unique_id: hems_target_current
+        unit_of_measurement: A
+        icon: mdi:current-ac
+
+        state: >
+          {% set available = states('sensor.hems_available_power') | float(0) %}
+
+          {% set current = (available / (230 * 3)) | round(0) %}
+
+          {% set min = states('input_number.hems_min_ampere') | int %}
+          {% set max = states('input_number.hems_max_ampere') | int %}
+
+          {% if current < min %}
+            {{ min }}
+          {% elif current > max %}
+            {{ max }}
+          {% else %}
+            {{ current }}
+          {% endif %}
