@@ -1,45 +1,59 @@
-################################################################################
-#
-# HEMS - Home Energy Management System
-#
-# Version : 0.2.0-alpha
-#
-# Datei : logging.yaml
-#
-################################################################################
-
-################################################################################
-# LOGGING
-################################################################################
-
 hems_log:
-
-  alias: HEMS - Log
-
-  mode: queued
+  alias: HEMS - Log Message
+  description: Einheitliches Logging für alle HEMS-Komponenten
 
   fields:
+    manager:
+      description: Managername (POWER, START, STOP ...)
+      example: POWER
+
+    level:
+      description: debug, info, warning, error
+      example: debug
 
     message:
-      description: Log message
+      description: Lognachricht
+      example: Avail=4500W Target=7A
 
   sequence:
 
-    - if:
+    - variables:
+        log_level: "{{ level | default('debug') | lower }}"
+        log_message: >
+          [HEMS][{{ manager | upper }}]
+          {{ message }}
 
-        - condition: state
-          entity_id: input_boolean.hems_debug
-          state: "on"
+    - choose:
 
-      then:
+        - conditions:
+            - condition: template
+              value_template: "{{ log_level == 'debug' }}"
+          sequence:
+            - action: system_log.write
+              data:
+                level: debug
+                message: "{{ log_message }}"
 
+        - conditions:
+            - condition: template
+              value_template: "{{ log_level == 'info' }}"
+          sequence:
+            - action: system_log.write
+              data:
+                level: info
+                message: "{{ log_message }}"
+
+        - conditions:
+            - condition: template
+              value_template: "{{ log_level == 'warning' }}"
+          sequence:
+            - action: system_log.write
+              data:
+                level: warning
+                message: "{{ log_message }}"
+
+      default:
         - action: system_log.write
-
           data:
-
-            level: info
-
-            logger: HEMS
-
-            message: >
-              {{ message }}
+            level: error
+            message: "{{ log_message }}"
