@@ -24,8 +24,13 @@
       device_class: power
       state_class: measurement
       state: >
-        {{ states('sensor.pv_charge_grid_power') | float(0) }}
-
+        {{
+          (
+            states('sensor.shellyem3_34945475879a_phase_a_leistung') | float(0)
+            + states('sensor.shellyem3_34945475879a_phase_b_leistung') | float(0)
+            + states('sensor.shellyem3_34945475879a_phase_c_leistung') | float(0)
+          ) | round(0)
+        }}
 ###############################################################################
 # Charging Power
 ###############################################################################
