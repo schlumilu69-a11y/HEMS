@@ -1,14 +1,16 @@
 hems_log:
   alias: HEMS - Log Message
   description: Einheitliches Logging für alle HEMS-Komponenten
+  mode: queued
+  max: 100
 
   fields:
     manager:
-      description: Managername (POWER, START, STOP ...)
+      description: Managername (POWER, START, STOP, ...)
       example: POWER
 
     level:
-      description: debug, info, warning, error
+      description: debug, info, warning oder error
       example: debug
 
     message:
@@ -18,42 +20,13 @@ hems_log:
   sequence:
 
     - variables:
+        log_manager: "{{ manager | default('GENERAL') }}"
         log_level: "{{ level | default('debug') | lower }}"
-        log_message: >
-          [HEMS][{{ manager | upper }}]
-          {{ message }}
+        log_text: "{{ message | default('') }}"
 
-    - choose:
-
-        - conditions:
-            - condition: template
-              value_template: "{{ log_level == 'debug' }}"
-          sequence:
-            - action: system_log.write
-              data:
-                level: debug
-                message: "{{ log_message }}"
-
-        - conditions:
-            - condition: template
-              value_template: "{{ log_level == 'info' }}"
-          sequence:
-            - action: system_log.write
-              data:
-                level: info
-                message: "{{ log_message }}"
-
-        - conditions:
-            - condition: template
-              value_template: "{{ log_level == 'warning' }}"
-          sequence:
-            - action: system_log.write
-              data:
-                level: warning
-                message: "{{ log_message }}"
-
-      default:
-        - action: system_log.write
-          data:
-            level: error
-            message: "{{ log_message }}"
+    - action: system_log.write
+      data:
+        level: "{{ log_level }}"
+        logger: hems
+        message: >-
+          [HEMS][{{ log_manager | upper }}] {{ log_text }}
