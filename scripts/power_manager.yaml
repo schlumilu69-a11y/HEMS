@@ -1,21 +1,68 @@
-hems_evbox_set_current:
+################################################################################
+# HEMS POWER MANAGER
+################################################################################
 
-  alias: EVBox Sollstrom setzen
+hems_power_manager:
 
-  fields:
+  alias: HEMS - Power Manager
 
-    current:
+  mode: single
+
+  variables:
+
+    target_current: >
+      {{ states('sensor.hems_target_current') | int(6) }}
+
+    current_current: >
+      {{ states('number.goe_082888_amp') | int(6) }}
+
+    charging: >
+      {{ is_state('binary_sensor.hems_charging_active','on') }}
+
+    goe_enabled: >
+      {{ is_state('input_boolean.hems_goe_enabled','on') }}
 
   sequence:
 
-    - action: ocpp.set_charge_rate
-      data:
-        devid: 22052459
-        conn_id: 1
-        limit_amps: "{{ current | int }}"
+    ###########################################################################
+    # Nicht laden
+    ###########################################################################
 
-    - action: input_number.set_value
-      target:
-        entity_id: input_number.hems_last_current
+    - if:
+        - condition: template
+          value_template: "{{ not charging }}"
+      then:
+        - stop: "Keine aktive Ladung"
+
+    ###########################################################################
+    # Go-e deaktiviert
+    ###########################################################################
+
+    - if:
+        - condition: template
+          value_template: "{{ not goe_enabled }}"
+      then:
+        - stop: "Go-e deaktiviert"
+
+    ###########################################################################
+    # Keine Änderung erforderlich
+    ###########################################################################
+
+    - if:
+        - condition: template
+          value_template: >
+            {{ target_current == current_current }}
+      then:
+        - stop: "Ladestrom bereits korrekt"
+
+    ###########################################################################
+    # Ladestrom setzen
+    ###########################################################################
+
+    - action: script.hems_log
       data:
-        value: "{{ current | int }}"
+        message: >
+          Power Manager:
+          {{ current_current }}A → {{ target_current }}A
+
+    - action: script.hems_goe_set_current
