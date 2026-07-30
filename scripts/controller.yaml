@@ -1,5 +1,5 @@
 ################################################################################
-# HEMS CONTROLLER V3
+# HEMS CONTROLLER V4
 ################################################################################
 
 hems_controller:
@@ -11,16 +11,17 @@ hems_controller:
   sequence:
 
     ###########################################################################
-    # Startbedingungen prüfen
+    # 1. Startbedingungen prüfen
     ###########################################################################
 
     - action: script.hems_start_manager
 
     ###########################################################################
-    # Nur wenn geladen wird
+    # 2. Nur wenn geladen wird
     ###########################################################################
 
     - if:
+
         - condition: state
           entity_id: binary_sensor.hems_charging_active
           state: "on"
@@ -28,25 +29,25 @@ hems_controller:
       then:
 
         #######################################################################
-        # 1. Leistung regeln
+        # 2.1 Ladeleistung regeln
         #######################################################################
 
         - action: script.hems_power_manager
 
         #######################################################################
-        # 2. Danach ggf. Phase wechseln
+        # 2.2 Phasenmanagement
         #######################################################################
 
         - action: script.hems_phase_manager
 
         #######################################################################
-        # 3. Prüfen ob gestoppt werden muss
+        # 2.3 Wallbox-Management
         #######################################################################
 
-        - action: script.hems_stop_manager
+        - action: script.hems_wallbox_manager
 
     ###########################################################################
-    # Controller-Zeit aktualisieren
+    # 3. Letzten Lauf speichern
     ###########################################################################
 
     - service: input_datetime.set_datetime
