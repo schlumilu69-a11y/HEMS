@@ -1,0 +1,117 @@
+################################################################################
+# EVBOX DRIVER
+################################################################################
+
+################################################################################
+# START CHARGING
+################################################################################
+
+hems_evbox_start:
+
+  alias: HEMS - EVBox Start
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "EVBox: Starte Ladevorgang"
+
+    ###########################################################################
+    # TODO:
+    # EVBox Start Service ergänzen
+    ###########################################################################
+
+################################################################################
+# STOP CHARGING
+################################################################################
+
+hems_evbox_stop:
+
+  alias: HEMS - EVBox Stop
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "EVBox: Stoppe Ladevorgang"
+
+    ###########################################################################
+    # TODO:
+    # EVBox Stop Service ergänzen
+    ###########################################################################
+
+################################################################################
+# SET CURRENT
+################################################################################
+
+hems_evbox_set_current:
+
+  alias: HEMS - EVBox Set Current
+
+  mode: restart
+
+  variables:
+
+    current: >
+      {{ states('sensor.hems_target_current') | int(6) }}
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: >
+          EVBox: Setze Ladestrom auf {{ current }} A
+
+    ###########################################################################
+    # TODO:
+    # EVBox Strom setzen
+    ###########################################################################
+
+################################################################################
+# FORCE 1 PHASE
+################################################################################
+
+hems_evbox_phase_1:
+
+  alias: HEMS - EVBox Force 1 Phase
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: >
+          EVBox unterstützt keine Phasenumschaltung.
+
+################################################################################
+# FORCE 3 PHASE
+################################################################################
+
+hems_evbox_phase_3:
+
+  alias: HEMS - EVBox Force 3 Phase
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: >
+          EVBox arbeitet immer 3-phasig.
+
+################################################################################
+# AUTO
+################################################################################
+
+hems_evbox_phase_auto:
+
+  alias: HEMS - EVBox Phase Auto
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: >
+          EVBox besitzt keinen automatischen Phasenmodus.
