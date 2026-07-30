@@ -1,15 +1,5 @@
 ################################################################################
-#
-# HEMS - Home Energy Management System
-#
-# Version : 0.2.0-alpha
-#
-# Datei : managers.yaml
-#
-################################################################################
-
-################################################################################
-# START MANAGER
+# HEMS START MANAGER
 ################################################################################
 
 hems_start_manager:
@@ -23,143 +13,43 @@ hems_start_manager:
     charging: >
       {{ is_state('binary_sensor.hems_charging_active','on') }}
 
-    delta: >
-      {{ states('sensor.hems_power_delta') | float(0) }}
-
     start_power: >
-      {{ states('input_number.hems_start_power') | float(1500) }}
+      {{ states('input_number.hems_start_power') | float(2500) }}
+
+    available_power: >
+      {{ states('sensor.hems_available_power') | float(0) }}
 
   sequence:
 
-    # Lädt bereits?
+    ###########################################################################
+    # Lädt bereits
+    ###########################################################################
+
     - if:
         - condition: template
           value_template: "{{ charging }}"
       then:
-        - stop: Charging already active
+        - stop: "Ladevorgang bereits aktiv"
 
-    # Genug Überschuss vorhanden?
-    - if:
-        - condition: template
-          value_template: "{{ delta >= start_power }}"
-      then:
-
-        - action: script.hems_log
-          data:
-            message: >
-              Start Manager:
-              Delta={{ delta }}W
-              Start={{ start_power }}W
-
-        - action: script.hems_charge_start
-
-################################################################################
-# POWER MANAGER V3
-################################################################################
-
-hems_power_manager:
-
-  alias: HEMS - Power Manager
-
-  mode: restart
-
-  variables:
-
-    current: >
-      {{ states('sensor.hems_charge_current') | int(6) }}
-
-    delta: >
-      {{ states('sensor.hems_power_delta') | float(0) }}
-
-    min_current: >
-      {{ states('input_number.hems_min_current') | int(6) }}
-
-    max_current: >
-      {{ states('input_number.hems_max_current') | int(16) }}
-
-    target_current: >
-
-      {% set c = current %}
-      {% set d = delta %}
-
-      {# ----------------------------- #}
-      {# DEAD BAND                    #}
-      {# ----------------------------- #}
-
-      {% if d > -300 and d < 300 %}
-        {{ c }}
-
-      {# ----------------------------- #}
-      {# MEHR PV -> schneller erhöhen #}
-      {# ----------------------------- #}
-
-      {% elif d >= 2000 %}
-        {{ [c + 3, max_current] | min }}
-
-      {% elif d >= 1000 %}
-        {{ [c + 2, max_current] | min }}
-
-      {% elif d >= 300 %}
-        {{ [c + 1, max_current] | min }}
-
-      {# ----------------------------- #}
-      {# NETZBEZUG -> langsamer senken#}
-      {# ----------------------------- #}
-
-      {% elif d <= -1500 %}
-        {{ [c - 2, min_current] | max }}
-
-      {% elif d <= -300 %}
-        {{ [c - 1, min_current] | max }}
-
-      {% else %}
-        {{ c }}
-
-      {% endif %}
-
-  sequence:
-
-    - action: script.hems_log
-      data:
-        message: >
-          PowerManager |
-          Delta={{ delta }}W |
-          Current={{ current }}A |
-          Target={{ target_current }}A
+    ###########################################################################
+    # Zu wenig Überschuss
+    ###########################################################################
 
     - if:
-
         - condition: template
           value_template: >
-            {{ target_current | int != current | int }}
-
+            {{ available_power < start_power }}
       then:
+        - stop: "Zu wenig PV-Leistung"
 
-        - action: script.hems_current_set
-          data:
-            ampere: "{{ target_current }}"
+    ###########################################################################
+    # Wallbox Manager entscheidet
+    ###########################################################################
 
-        - service: input_datetime.set_datetime
-          target:
-            entity_id: input_datetime.hems_last_current_change
-          data:
-            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - action: script.hems_wallbox_manager
 
-        - action: script.hems_log
-          data:
-            message: >
-              PowerManager |
-              Current changed from {{ current }}A to {{ target_current }}A
-
-      else:
-
-        - action: script.hems_log
-          data:
-            message: >
-              PowerManager |
-              No current change required
 ################################################################################
-# STOP MANAGER
+# HEMS STOP MANAGER
 ################################################################################
 
 hems_stop_manager:
@@ -173,70 +63,20 @@ hems_stop_manager:
     charging: >
       {{ is_state('binary_sensor.hems_charging_active','on') }}
 
-    delta: >
-      {{ states('sensor.hems_power_delta') | float(0) }}
-
-    stop_power: >
-      {{ states('input_number.hems_stop_power') | float(800) }}
-
   sequence:
+
+    ###########################################################################
+    # Keine Ladung
+    ###########################################################################
 
     - if:
         - condition: template
           value_template: "{{ not charging }}"
       then:
-        - stop: Not charging
+        - stop: "Keine aktive Ladung"
 
-    - if:
-        - condition: template
-          value_template: "{{ delta < stop_power }}"
-      then:
+    ###########################################################################
+    # Übergabe an Wallbox Manager
+    ###########################################################################
 
-        - action: script.hems_log
-          data:
-            message: >
-              Stop Manager:
-              Delta={{ delta }}W
-
-        - action: script.hems_charge_stop
-
-################################################################################
-# PHASE MANAGER
-################################################################################
-
-hems_phase_manager:
-
-  alias: HEMS - Phase Manager
-
-  mode: restart
-
-  variables:
-
-    charging: >
-      {{ is_state('binary_sensor.hems_charging_active','on') }}
-
-    available_power: >
-      {{ states('sensor.hems_available_power') | float(0) }}
-
-    switch_power: >
-      {{ states('input_number.hems_phase_switch_power') | float(4200) }}
-
-  sequence:
-
-    - if:
-        - condition: template
-          value_template: "{{ not charging }}"
-      then:
-        - stop: Vehicle not charging
-
-    - if:
-        - condition: template
-          value_template: >
-            {{ available_power >= switch_power }}
-      then:
-
-        - action: script.hems_phase_three
-
-      else:
-
-        - action: script.hems_phase_single
+    - action: script.hems_wallbox_manager
