@@ -1,0 +1,128 @@
+################################################################################
+# HEMS WALLBOX CONFIGURATION
+################################################################################
+
+################################################################################
+# ACTIVE WALLBOX
+################################################################################
+
+input_select:
+
+  hems_active_wallbox:
+    name: Aktive Wallbox
+    icon: mdi:ev-station
+    options:
+      - None
+      - Go-e
+      - EVBox
+    initial: None
+
+################################################################################
+# WALLBOX PRIORITY
+################################################################################
+
+input_number:
+
+  hems_goe_priority:
+    name: Go-e Ladepriorität
+    min: 1
+    max: 10
+    step: 1
+    initial: 1
+
+  hems_evbox_priority:
+    name: EVBox Ladepriorität
+    min: 1
+    max: 10
+    step: 1
+    initial: 2
+
+################################################################################
+# LOAD SHEDDING PRIORITY
+################################################################################
+
+  hems_goe_shed_priority:
+    name: Go-e Abschaltpriorität
+    min: 1
+    max: 10
+    step: 1
+    initial: 2
+
+  hems_evbox_shed_priority:
+    name: EVBox Abschaltpriorität
+    min: 1
+    max: 10
+    step: 1
+    initial: 1
+
+################################################################################
+# WALLBOX CAPABILITIES
+################################################################################
+
+input_boolean:
+
+  hems_goe_enabled:
+    name: Go-e aktiviert
+    icon: mdi:ev-station
+
+  hems_evbox_enabled:
+    name: EVBox aktiviert
+    icon: mdi:ev-station
+
+  hems_goe_supports_phase_switch:
+    name: Go-e unterstützt Phasenumschaltung
+    icon: mdi:swap-horizontal
+    initial: true
+
+  hems_evbox_supports_phase_switch:
+    name: EVBox unterstützt Phasenumschaltung
+    icon: mdi:swap-horizontal
+    initial: false
+
+  hems_goe_supports_current_control:
+    name: Go-e unterstützt Stromregelung
+    icon: mdi:current-ac
+    initial: true
+
+  hems_evbox_supports_current_control:
+    name: EVBox unterstützt Stromregelung
+    icon: mdi:current-ac
+    initial: false
+
+################################################################################
+# WALLBOX POWER LIMITS
+################################################################################
+
+input_number:
+
+  hems_goe_min_power:
+    name: Go-e Mindestleistung
+    min: 1000
+    max: 5000
+    step: 100
+    unit_of_measurement: W
+    initial: 1380
+
+  hems_goe_max_power:
+    name: Go-e Maximalleistung
+    min: 3000
+    max: 22000
+    step: 100
+    unit_of_measurement: W
+    initial: 11000
+
+  hems_evbox_min_power:
+    name: EVBox Mindestleistung
+    min: 3000
+    max: 5000
+    step: 100
+    unit_of_measurement: W
+    initial: 4140
+
+  hems_evbox_max_power:
+    name: EVBox Maximalleistung
+    min: 3000
+    max: 22000
+    step: 100
+    unit_of_measurement: W
+    initial: 11000
