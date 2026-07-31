@@ -167,44 +167,42 @@
 # HEMS - Wallbox Sensoren
 ################################################################################
 
-- sensor:
-
-    ###########################################################################
-    # Go-e Ladeleistung
-    ###########################################################################
+###########################################################################
+# Go-e Ladeleistung
+###########################################################################
 
     - name: HEMS Go-e Power
       unique_id: hems_goe_power
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-
+    
       state: >
         {{ states('sensor.goe_082888_nrg_11') | float(0) }}
 
-    ###########################################################################
-    # EVBox Ladeleistung
-    ###########################################################################
+###########################################################################
+# EVBox Ladeleistung
+###########################################################################
 
     - name: HEMS EVBox Power
       unique_id: hems_evbox_power
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-
+    
       state: >
         {{ states('sensor.22052459_power_active_import') | float(0) }}
 
-    ###########################################################################
-    # Gesamtladeleistung
-    ###########################################################################
-
+###########################################################################
+# Gesamtladeleistung
+###########################################################################
+    
     - name: HEMS Charging Power
       unique_id: hems_charging_power
       device_class: power
       state_class: measurement
       unit_of_measurement: W
-
+    
       state: >
         {{
           states('sensor.hems_goe_power')|float(0)
@@ -230,17 +228,7 @@
         {% else %}
           Keine
         {% endif %}
-###########################################################################
-# Laden aktiv
-###########################################################################
 
-    - name: HEMS Charging Active
-      unique_id: hems_charging_active
-    
-      state: >
-        {{
-          states('sensor.hems_charging_power')|float(0) > 100
-        }}
 
 ################################################################################
 # Binary Sensoren
@@ -256,7 +244,17 @@
       unique_id: hems_enabled
       state: >
         {{ is_state('input_boolean.hems_enabled','on') }}
+###########################################################################
+# Laden aktiv
+###########################################################################
 
+    - name: HEMS Charging Active
+      unique_id: hems_charging_active
+    
+      state: >
+        {{
+          states('sensor.hems_charging_power')|float(0) > 100
+        }}
 ###############################################################################
 # Vehicle Connected
 ###############################################################################
