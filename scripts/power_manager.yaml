@@ -22,7 +22,7 @@ hems_power_manager:
     ###########################################################################
 
     active_wallbox: >
-      {{ states('input_select.hems_active_wallbox') | lower }}
+      {{ states('sensor.hems_active_wallbox') | lower }}
 
     ###########################################################################
     # Aktueller Sollstrom der aktiven Wallbox
