@@ -10,22 +10,47 @@ hems_power_manager:
 
   variables:
 
+    ###########################################################################
+    # Zielstrom
+    ###########################################################################
+
     target_current: >
       {{ states('sensor.hems_target_current') | int(6) }}
 
+    ###########################################################################
+    # Aktive Wallbox
+    ###########################################################################
+
+    active_wallbox: >
+      {{ states('input_select.hems_active_wallbox') | lower }}
+
+    ###########################################################################
+    # Aktueller Sollstrom der aktiven Wallbox
+    ###########################################################################
+
     current_current: >
-      {{ states('number.goe_082888_amp') | int(6) }}
+
+      {% if active_wallbox == 'go-e' %}
+        {{ states('number.goe_082888_amp') | int(6) }}
+
+      {% elif active_wallbox == 'evbox' %}
+        {{ states('sensor.22052459_current_offered') | int(6) }}
+
+      {% else %}
+        6
+      {% endif %}
+
+    ###########################################################################
+    # Lädt aktuell
+    ###########################################################################
 
     charging: >
       {{ is_state('binary_sensor.hems_charging_active','on') }}
 
-    goe_enabled: >
-      {{ is_state('input_boolean.hems_goe_enabled','on') }}
-
   sequence:
 
     ###########################################################################
-    # Nicht laden
+    # Keine aktive Ladung
     ###########################################################################
 
     - if:
@@ -35,17 +60,18 @@ hems_power_manager:
         - stop: "Keine aktive Ladung"
 
     ###########################################################################
-    # Go-e deaktiviert
+    # Keine Wallbox gewählt
     ###########################################################################
 
     - if:
         - condition: template
-          value_template: "{{ not goe_enabled }}"
+          value_template: >
+            {{ active_wallbox not in ['go-e','evbox'] }}
       then:
-        - stop: "Go-e deaktiviert"
+        - stop: "Keine aktive Wallbox"
 
     ###########################################################################
-    # Keine Änderung erforderlich
+    # Bereits korrekt
     ###########################################################################
 
     - if:
@@ -56,13 +82,40 @@ hems_power_manager:
         - stop: "Ladestrom bereits korrekt"
 
     ###########################################################################
-    # Ladestrom setzen
+    # Logging
     ###########################################################################
 
     - action: script.hems_log
       data:
         message: >
           Power Manager:
+          {{ active_wallbox }}
           {{ current_current }}A → {{ target_current }}A
 
-    - action: script.hems_goe_set_current
+    ###########################################################################
+    # Go-e
+    ###########################################################################
+
+    - choose:
+
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ active_wallbox == 'go-e' }}
+
+          sequence:
+
+            - action: script.hems_goe_set_current
+
+        #######################################################################
+        # EVBox
+        #######################################################################
+
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ active_wallbox == 'evbox' }}
+
+          sequence:
+
+            - action: script.hems_evbox_set_current
