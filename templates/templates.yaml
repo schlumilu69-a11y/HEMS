@@ -163,17 +163,56 @@
           {{ amp | round(0) }}
         {% endif %}
 
-###############################################################################
-# Power EV BOX
-###############################################################################
-    - name: hems_evbox_power
-      unique_id: hems_evbox_power
-      unit_of_measurement: W
+################################################################################
+# HEMS - Wallbox Sensoren
+################################################################################
+
+- sensor:
+
+    ###########################################################################
+    # Go-e Ladeleistung
+    ###########################################################################
+
+    - name: HEMS Go-e Power
+      unique_id: hems_goe_power
       device_class: power
       state_class: measurement
+      unit_of_measurement: W
+
+      state: >
+        {{ states('sensor.goe_082888_nrg_11') | float(0) }}
+
+    ###########################################################################
+    # EVBox Ladeleistung
+    ###########################################################################
+
+    - name: HEMS EVBox Power
+      unique_id: hems_evbox_power
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
 
       state: >
         {{ states('sensor.22052459_power_active_import') | float(0) }}
+
+    ###########################################################################
+    # Gesamtladeleistung
+    ###########################################################################
+
+    - name: HEMS Charging Power
+      unique_id: hems_charging_power
+      device_class: power
+      state_class: measurement
+      unit_of_measurement: W
+
+      state: >
+        {{
+          states('sensor.hems_goe_power')|float(0)
+          +
+          states('sensor.hems_evbox_power')|float(0)
+        }}
+
+
 
 ################################################################################
 # Binary Sensoren
