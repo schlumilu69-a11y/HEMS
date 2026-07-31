@@ -121,3 +121,9 @@ hems_wallbox_manager:
               Nur EVBox lädt -> EVBox stoppen.
 
         - action: script.hems_evbox_stop
+
+#####   helpers   ####
+
+hems_last_decision:
+  name: HEMS Letzte Entscheidung
+  max: 100
