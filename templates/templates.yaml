@@ -100,12 +100,23 @@
       unit_of_measurement: W
       device_class: power
       state_class: measurement
-    
+      icon: mdi:solar-power
+
       state: >
-        {% set reserve = states('input_number.hems_target_grid_import') | float(300) %}
-        {% set grid = states('sensor.hems_grid_power') | float(0) %}
-    
-        {{ (reserve - grid) | round(0) }}
+
+        {% set grid = states('sensor.shellyem3_34945475879a_total_active_power') | float(0) %}
+        {% set reserve = states('input_number.hems_power_reserve') | float(300) %}
+        {% set target = states('input_number.hems_target_grid_power') | float(300) %}
+
+        {#
+          Shelly:
+          Einspeisung = negativ
+          Netzbezug  = positiv
+        #}
+
+        {% set available = (-grid) + target - reserve %}
+
+        {{ available | round(0) }}
 ###############################################################################
 # Power Delta
 ###############################################################################
@@ -115,10 +126,25 @@
       unit_of_measurement: W
       device_class: power
       state_class: measurement
+      icon: mdi:flash
+
       state: >
-        {% set target = states('input_number.hems_target_grid_import') | float(300) %}
-        {% set grid = states('sensor.hems_grid_power') | float(0) %}
-        {{ (target - grid) | round(0) }}
+
+        {% set available = states('sensor.hems_available_power') | float(0) %}
+
+        {% set wallbox = states('sensor.hems_active_wallbox') %}
+
+        {% if wallbox == 'Go-e' %}
+          {% set charging_power = states('sensor.hems_goe_power') | float(0) %}
+
+        {% elif wallbox == 'EVBox' %}
+          {% set charging_power = states('sensor.hems_evbox_power') | float(0) %}
+
+        {% else %}
+          {% set charging_power = 0 %}
+        {% endif %}
+
+        {{ (available - charging_power) | round(0) }}
 
 ###############################################################################
 # Status
@@ -186,12 +212,24 @@
 
     - name: HEMS EVBox Power
       unique_id: hems_evbox_power
+      unit_of_measurement: W
       device_class: power
       state_class: measurement
-      unit_of_measurement: W
-    
+      icon: mdi:ev-station
+
       state: >
-        {{ states('sensor.22052459_power_active_import') | float(0) }}
+
+        {% set status = states('sensor.22052459_status_connector') %}
+        {% set current = states('sensor.22052459_current_offered') | float(0) %}
+
+        {# Aktuell fest auf 3 Phasen #}
+        {% set phases = 3 %}
+
+        {% if status in ['Charging', 'SuspendedEV', 'SuspendedEVSE'] %}
+          {{ (230 * phases * current) | round(0) }}
+        {% else %}
+          0
+        {% endif %}
 
 ###########################################################################
 # Gesamtladeleistung
