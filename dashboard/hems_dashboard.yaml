@@ -4,31 +4,32 @@ icon: mdi:home-lightning-bolt
 
 cards:
 
+###############################################################################
+# ENERGIE
+###############################################################################
+
   - type: entities
-    title: ⚡ HEMS Übersicht
+    title: ⚡ Energie
     show_header_toggle: false
-
     entities:
-
-      #########################################################################
-      # Energie
-      #########################################################################
 
       - entity: sensor.hems_grid_power
         name: Netzbezug / Einspeisung
-        icon: mdi:transmission-tower
 
       - entity: sensor.hems_available_power
         name: Verfügbare Ladeleistung
-        icon: mdi:solar-power
 
       - entity: sensor.hems_power_delta
         name: Power Delta
-        icon: mdi:chart-line
 
-      #########################################################################
-      # Schwellwerte
-      #########################################################################
+###############################################################################
+# SCHWELLWERTE
+###############################################################################
+
+  - type: entities
+    title: 🎯 Schwellwerte
+    show_header_toggle: false
+    entities:
 
       - entity: input_number.hems_start_power
         name: Startschwelle
@@ -36,14 +37,107 @@ cards:
       - entity: input_number.hems_stop_power
         name: Stoppschwelle
 
-      #########################################################################
-      # Wallboxen
-      #########################################################################
+      - entity: sensor.hems_target_current
+        name: Zielstrom
 
-      - entity: sensor.goe_082888_nrg_11
-        name: Ladeleistung Go-e
-        icon: mdi:ev-station
+      - entity: sensor.hems_target_phases
+        name: Zielphasen
 
-      - entity: sensor.evbox_power
-        name: Ladeleistung EVBox
-        icon: mdi:ev-station
+###############################################################################
+# GO-E
+###############################################################################
+
+  - type: entities
+    title: 🔋 Go-e Charger
+    show_header_toggle: false
+    entities:
+
+      - entity: sensor.hems_goe_power
+        name: Ladeleistung
+
+      - entity: number.goe_082888_amp
+        name: Sollstrom
+
+      - entity: binary_sensor.goe_082888_fsp
+        name: Lädt
+
+      - entity: select.goe_082888_psm
+        name: Phasenmodus
+
+###############################################################################
+# EVBOX
+###############################################################################
+
+  - type: entities
+    title: 🚗 EVBox
+    show_header_toggle: false
+    entities:
+
+      - entity: sensor.hems_evbox_power
+        name: Ladeleistung
+
+      - entity: sensor.22052459_current_import
+        name: Aktueller Strom
+
+      - entity: sensor.22052459_current_offered
+        name: Sollstrom
+
+###############################################################################
+# CONTROLLER
+###############################################################################
+
+  - type: entities
+    title: 🧠 HEMS Controller
+    show_header_toggle: false
+    entities:
+
+      - entity: binary_sensor.hems_charging_active
+        name: Laden aktiv
+
+      - entity: input_datetime.hems_last_controller_run
+        name: Letzter Controllerlauf
+
+###############################################################################
+# DEBUG
+###############################################################################
+
+  - type: entities
+    title: 🛠 Debug
+    state_color: true
+    show_header_toggle: false
+    entities:
+
+      - entity: sensor.hems_grid_power
+
+      - entity: sensor.hems_available_power
+
+      - entity: sensor.hems_power_delta
+
+      - entity: sensor.hems_target_current
+
+      - entity: sensor.hems_target_phases
+
+      - entity: sensor.hems_goe_power
+
+      - entity: sensor.hems_evbox_power
+
+      - entity: binary_sensor.hems_charging_active
+
+###############################################################################
+# TEST
+###############################################################################
+
+  - type: entities
+    title: ▶ Testfunktionen
+    show_header_toggle: false
+    entities:
+
+      - entity: script.hems_controller
+
+      - entity: script.hems_start_manager
+
+      - entity: script.hems_power_manager
+
+      - entity: script.hems_phase_manager
+
+      - entity: script.hems_wallbox_manager
