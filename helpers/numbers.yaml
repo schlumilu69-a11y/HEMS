@@ -101,8 +101,8 @@
 
   hems_target_current:
     name: Letzter Sollstrom
-    min: 0
-    max: 32
+    min: 6
+    max: 16
     step: 1
     unit_of_measurement: A
     mode: box
