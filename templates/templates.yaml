@@ -109,34 +109,6 @@
     
         {{ available | round(0) }}
         
-###############################################################################
-# Power Delta
-###############################################################################
-
-    - name: HEMS Power Delta
-      unique_id: hems_power_delta
-      unit_of_measurement: W
-      device_class: power
-      state_class: measurement
-      icon: mdi:flash
-
-      state: >
-
-        {% set available = states('sensor.hems_available_power') | float(0) %}
-
-        {% set wallbox = states('sensor.hems_active_wallbox') %}
-
-        {% if wallbox == 'Go-e' %}
-          {% set charging_power = states('sensor.hems_goe_power') | float(0) %}
-
-        {% elif wallbox == 'EVBox' %}
-          {% set charging_power = states('sensor.hems_evbox_power') | float(0) %}
-
-        {% else %}
-          {% set charging_power = 0 %}
-        {% endif %}
-
-        {{ (available - charging_power) | round(0) }}
 
 ###############################################################################
 # Status
