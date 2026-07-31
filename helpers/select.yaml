@@ -24,3 +24,15 @@ hems_charge_mode:
     - Automatisch
 
   initial: Automatisch
+
+hems_controller_state:
+  name: HEMS Controller Status
+  options:
+    - Idle
+    - WaitingForPV
+    - Starting
+    - Charging
+    - Hold
+    - PhaseSwitch
+    - Stopping
+    - Error
