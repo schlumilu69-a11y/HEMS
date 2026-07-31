@@ -1,0 +1,49 @@
+title: HEMS
+path: hems
+icon: mdi:home-lightning-bolt
+
+cards:
+
+  - type: entities
+    title: ⚡ HEMS Übersicht
+    show_header_toggle: false
+
+    entities:
+
+      #########################################################################
+      # Energie
+      #########################################################################
+
+      - entity: sensor.hems_grid_power
+        name: Netzbezug / Einspeisung
+        icon: mdi:transmission-tower
+
+      - entity: sensor.hems_available_power
+        name: Verfügbare Ladeleistung
+        icon: mdi:solar-power
+
+      - entity: sensor.hems_power_delta
+        name: Power Delta
+        icon: mdi:chart-line
+
+      #########################################################################
+      # Schwellwerte
+      #########################################################################
+
+      - entity: input_number.hems_start_power
+        name: Startschwelle
+
+      - entity: input_number.hems_stop_power
+        name: Stoppschwelle
+
+      #########################################################################
+      # Wallboxen
+      #########################################################################
+
+      - entity: sensor.goe_082888_nrg_11
+        name: Ladeleistung Go-e
+        icon: mdi:ev-station
+
+      - entity: sensor.evbox_power
+        name: Ladeleistung EVBox
+        icon: mdi:ev-station
