@@ -66,10 +66,11 @@ hems_evbox_set_current:
         message: >
           EVBox: Setze Ladestrom auf {{ current }} A
 
-    ###########################################################################
-    # TODO:
-    # EVBox Strom setzen
-    ###########################################################################
+    - action: ocpp.set_charge_rate
+      data:
+        devid: "22052459"
+        limit_amps: "{{ current }}"
+        conn_id: 1
 
 ################################################################################
 # FORCE 1 PHASE
