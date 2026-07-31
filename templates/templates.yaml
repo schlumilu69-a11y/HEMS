@@ -104,7 +104,7 @@
 
       state: >
 
-        {% set grid = states('sensor.shellyem3_34945475879a_total_active_power') | float(0) %}
+        {% set grid = states('sensor.hems_grid_power') | float(0) %}
         {% set reserve = states('input_number.hems_power_reserve') | float(300) %}
         {% set target = states('input_number.hems_target_grid_power') | float(300) %}
 
