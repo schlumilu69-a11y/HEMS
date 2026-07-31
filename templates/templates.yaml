@@ -211,8 +211,36 @@
           +
           states('sensor.hems_evbox_power')|float(0)
         }}
+###########################################################################
+# Aktive Wallbox
+###########################################################################
 
+    - name: HEMS Active Wallbox
+      unique_id: hems_active_wallbox
+    
+      state: >
+    
+        {% set goe = states('sensor.hems_goe_power') | float(0) %}
+        {% set evbox = states('sensor.hems_evbox_power') | float(0) %}
+    
+        {% if goe > 100 %}
+          Go-e
+        {% elif evbox > 100 %}
+          EVBox
+        {% else %}
+          Keine
+        {% endif %}
+###########################################################################
+# Laden aktiv
+###########################################################################
 
+    - name: HEMS Charging Active
+      unique_id: hems_charging_active
+    
+      state: >
+        {{
+          states('sensor.hems_charging_power')|float(0) > 100
+        }}
 
 ################################################################################
 # Binary Sensoren
