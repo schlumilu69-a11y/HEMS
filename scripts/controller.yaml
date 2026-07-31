@@ -2,52 +2,149 @@
 # HEMS CONTROLLER V4
 ################################################################################
 
+################################################################################
+#
+# HEMS Controller
+#
+# Aufgabe:
+#   - PV-Überschuss auswerten
+#   - Zielstrom berechnen
+#   - Zielstrom speichern
+#   - Power Manager starten
+#
+################################################################################
+
 hems_controller:
 
-  alias: HEMS - Main Controller
-
+  alias: HEMS Controller
   mode: single
 
   sequence:
 
     ###########################################################################
-    # 1. Startbedingungen prüfen
+    # Variablen
     ###########################################################################
 
-    - action: script.hems_start_manager
+    - variables:
+
+        available_power: >
+          {{ states('sensor.hems_available_power') | float(0) }}
+
+        power_delta: >
+          {{ states('sensor.hems_power_delta') | float(0) }}
+
+        target_current: >
+          {{ states('input_number.hems_target_current') | int(6) }}
+
+        min_current: >
+          {{ states('input_number.hems_min_ampere') | int(6) }}
+
+        max_current: >
+          {{ states('input_number.hems_max_ampere') | int(16) }}
+
+        step: >
+          {{ states('input_number.hems_current_step') | int(1) }}
+
+        deadband: >
+          {{ states('input_number.hems_deadband') | float(150) }}
+
+        charging: >
+          {{ is_state('binary_sensor.hems_charging_active','on') }}
 
     ###########################################################################
-    # 2. Nur wenn geladen wird
+    # Keine aktive Ladung
     ###########################################################################
 
     - if:
 
-        - condition: state
-          entity_id: binary_sensor.hems_charging_active
-          state: "on"
+        - condition: template
+          value_template: "{{ not charging }}"
 
       then:
 
-        #######################################################################
-        # 2.1 Ladeleistung regeln
-        #######################################################################
+        - service: input_text.set_value
+          target:
+            entity_id: input_text.hems_controller_state
+          data:
+            value: "Idle"
 
-        - action: script.hems_power_manager
-
-        #######################################################################
-        # 2.2 Phasenmanagement
-        #######################################################################
-
-        - action: script.hems_phase_manager
-
-        #######################################################################
-        # 2.3 Wallbox-Management
-        #######################################################################
-
-        - action: script.hems_wallbox_manager
+        - stop: "Keine aktive Ladung"
 
     ###########################################################################
-    # 3. Letzten Lauf speichern
+    # Innerhalb Totzone
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ power_delta | abs < deadband }}
+
+      then:
+
+        - service: input_text.set_value
+          target:
+            entity_id: input_text.hems_controller_state
+          data:
+            value: "Deadband"
+
+        - stop: "Keine Änderung erforderlich"
+
+    ###########################################################################
+    # Zielstrom berechnen
+    ###########################################################################
+
+    - variables:
+
+        new_current: >
+
+          {% set current = target_current %}
+
+          {% if power_delta > deadband %}
+            {% set current = current + step %}
+          {% elif power_delta < -deadband %}
+            {% set current = current - step %}
+          {% endif %}
+
+          {% if current < min_current %}
+            {% set current = min_current %}
+          {% endif %}
+
+          {% if current > max_current %}
+            {% set current = max_current %}
+          {% endif %}
+
+          {{ current }}
+
+    ###########################################################################
+    # Zielstrom speichern
+    ###########################################################################
+
+    - service: input_number.set_value
+      target:
+        entity_id: input_number.hems_target_current
+      data:
+        value: "{{ new_current }}"
+
+    ###########################################################################
+    # Controller Status
+    ###########################################################################
+
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.hems_controller_state
+      data:
+        value: >
+          {% if new_current > target_current %}
+            Increase Current
+          {% elif new_current < target_current %}
+            Decrease Current
+          {% else %}
+            Hold Current
+          {% endif %}
+
+    ###########################################################################
+    # Zeitstempel aktualisieren
     ###########################################################################
 
     - service: input_datetime.set_datetime
@@ -55,3 +152,9 @@ hems_controller:
         entity_id: input_datetime.hems_last_controller_run
       data:
         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    ###########################################################################
+    # Power Manager starten
+    ###########################################################################
+
+    - service: script.hems_power_manager
