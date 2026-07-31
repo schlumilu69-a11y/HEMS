@@ -28,15 +28,6 @@
     mode: box
     initial: 300
 
-  hems_controller_interval:
-    name: Reglerintervall
-    min: 10
-    max: 120
-    step: 5
-    unit_of_measurement: s
-    mode: slider
-    initial: 20
-
   ##############################################################################
   # Charging
   ##############################################################################
@@ -108,7 +99,7 @@
     mode: slider
     initial: 1
 
-  hems_last_current:
+  hems_target_current:
     name: Letzter Sollstrom
     min: 0
     max: 32
