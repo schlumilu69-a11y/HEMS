@@ -239,52 +239,6 @@
     
         {% endif %}
 
-
-################################################################################
-# Binary Sensoren
-################################################################################
-
-- binary_sensor:
-
-###############################################################################
-# Enabled
-###############################################################################
-
-    - name: HEMS Enabled
-      unique_id: hems_enabled
-      state: >
-        {{ is_state('input_boolean.hems_enabled','on') }}
-###########################################################################
-# Laden aktiv
-###########################################################################
-
-    - name: HEMS Charging Active
-      unique_id: hems_charging_active
-    
-      state: >
-        {{
-          states('sensor.hems_charging_power')|float(0) > 100
-        }}
-###############################################################################
-# Vehicle Connected
-###############################################################################
-
-    - name: HEMS Vehicle Connected
-      unique_id: hems_vehicle_connected
-      device_class: plug
-      state: >
-        {{ is_state('binary_sensor.goe_082888_car_0','on') }}
-
-###############################################################################
-# Charging Active
-###############################################################################
-
-    - name: HEMS Charging Active
-      unique_id: hems_charging_active
-      device_class: battery_charging
-      state: >
-        {{ states('sensor.hems_charging_power') | float(0) > 100 }}
-
 ###############################################################################
 # Grid Import
 ###############################################################################
@@ -379,3 +333,50 @@
           Idle
 
         {% endif %}
+
+
+################################################################################
+# Binary Sensoren
+################################################################################
+
+- binary_sensor:
+
+###############################################################################
+# Enabled
+###############################################################################
+
+    - name: HEMS Enabled
+      unique_id: hems_enabled
+      state: >
+        {{ is_state('input_boolean.hems_enabled','on') }}
+###########################################################################
+# Laden aktiv
+###########################################################################
+
+    - name: HEMS Charging Active
+      unique_id: hems_charging_active
+    
+      state: >
+        {{
+          states('sensor.hems_charging_power')|float(0) > 100
+        }}
+###############################################################################
+# Vehicle Connected
+###############################################################################
+
+    - name: HEMS Vehicle Connected
+      unique_id: hems_vehicle_connected
+      device_class: plug
+      state: >
+        {{ is_state('binary_sensor.goe_082888_car_0','on') }}
+
+###############################################################################
+# Charging Active
+###############################################################################
+
+    - name: HEMS Charging Active
+      unique_id: hems_charging_active
+      device_class: battery_charging
+      state: >
+        {{ states('sensor.hems_charging_power') | float(0) > 100 }}
+
