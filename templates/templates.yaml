@@ -259,10 +259,10 @@
 
         {% set wallbox = states('sensor.hems_active_wallbox') %}
 
-        {% if wallbox == 'Go-e' %}
+        {% if wallbox == 'go-e' %}
           {{ states('number.goe_082888_amp') | int(6) }}
 
-        {% elif wallbox == 'EVBox' %}
+        {% elif wallbox == 'evbox' %}
           {{ states('sensor.22052459_current_offered') | int(6) }}
 
         {% else %}
