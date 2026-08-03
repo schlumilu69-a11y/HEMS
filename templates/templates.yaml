@@ -304,3 +304,26 @@
         {{ states('sensor.hems_grid_power') | float(0) < 0 }}
 
 
+###############################################################################
+# WALLBOX CURRENT
+###############################################################################
+
+    - name: HEMS Wallbox Current
+      unique_id: hems_wallbox_current
+      unit_of_measurement: A
+      device_class: current
+      state_class: measurement
+
+      state: >
+
+        {% set wallbox = states('sensor.hems_active_wallbox') %}
+
+        {% if wallbox == 'Go-e' %}
+          {{ states('number.goe_082888_amp') | int(6) }}
+
+        {% elif wallbox == 'EVBox' %}
+          {{ states('sensor.22052459_current_offered') | int(6) }}
+
+        {% else %}
+          0
+        {% endif %}
