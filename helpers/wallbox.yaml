@@ -126,3 +126,28 @@ input_number:
     step: 100
     unit_of_measurement: W
     initial: 11000
+    
+################################################################################
+# Active Wallbox Current
+################################################################################
+
+- sensor:
+
+    - name: HEMS Wallbox Current
+      unique_id: hems_wallbox_current
+      unit_of_measurement: A
+      icon: mdi:current-ac
+
+      state: >
+
+        {% set wb = states('sensor.hems_active_wallbox') %}
+
+        {% if wb == 'Go-e' %}
+          {{ states('number.goe_082888_amp') | float(6) }}
+
+        {% elif wb == 'EVBox' %}
+          {{ states('sensor.22052459_current_offered') | float(6) }}
+
+        {% else %}
+          0
+        {% endif %}
