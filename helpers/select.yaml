@@ -36,3 +36,51 @@ hems_controller_state:
     - PhaseSwitch
     - Stopping
     - Error
+
+################################################################################
+# HEMS WALLBOX CONTROL
+################################################################################
+
+hems_controlled_wallbox:
+  name: Gesteuerte Wallbox
+
+  options:
+    - Auto
+    - Go-e
+    - EVBox
+
+  initial: Auto
+  icon: mdi:ev-station
+
+  ################################################################################
+# WALLBOX PRIORITY
+################################################################################
+
+hems_wallbox_priority:
+
+  name: Wallbox Priorität
+
+  options:
+    - Go-e
+    - EVBox
+
+  initial: Go-e
+
+  icon: mdi:priority-high
+
+  ################################################################################
+# WALLBOX MODE
+################################################################################
+
+hems_wallbox_mode:
+
+  name: Wallbox Modus
+
+  options:
+    - Automatisch
+    - PV
+    - Sofort
+
+  initial: Automatisch
+
+  icon: mdi:auto-mode
