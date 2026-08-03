@@ -10,8 +10,14 @@ hems_evbox_start:
 
   alias: HEMS - EVBox Start
 
-  mode: single
-
+  mode: restart
+  
+  fields:
+  
+      current:
+        description: Zielstrom in Ampere
+        example: 8
+        
   sequence:
 
     - action: script.hems_log
@@ -57,7 +63,7 @@ hems_evbox_set_current:
   variables:
 
     current: >
-      {{ states('sensor.hems_target_current') | int(6) }}
+      {{ current | int(6) }}
 
   sequence:
 
