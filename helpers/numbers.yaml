@@ -106,7 +106,7 @@
     step: 1
     unit_of_measurement: A
     mode: box
-    initial: 0
+    initial: 6
 
   hems_current_hold_time:
     name: Stromhaltezeit
