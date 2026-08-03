@@ -7,15 +7,20 @@ hems_power_manager:
   alias: HEMS - Power Manager
 
   mode: single
-
-  variables:
+  
+    fields:
+    
+        target_current:
+          description: Ziel-Ladestrom in Ampere
+          example: 8
+      variables:
 
     ###########################################################################
     # Zielstrom
     ###########################################################################
 
     target_current: >
-      {{ states('sensor.hems_wallbox_current') | int(6) }}
+      {{ target_current | int(6) }}
 
     ###########################################################################
     # Aktive Wallbox
