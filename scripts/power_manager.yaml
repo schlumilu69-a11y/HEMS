@@ -15,7 +15,7 @@ hems_power_manager:
     ###########################################################################
 
     target_current: >
-      {{ states('sensor.hems_target_current') | int(6) }}
+      {{ states('sensor.hems_wallbox_current') | int(6) }}
 
     ###########################################################################
     # Aktive Wallbox
