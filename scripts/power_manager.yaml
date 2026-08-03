@@ -130,7 +130,11 @@ hems_power_manager:
                 {{ active_wallbox == 'evbox' }}
 
           sequence:
-
+            - action: script.hems_log
+              data:
+                message: >
+                  PM -> EVBox:
+                  current={{ target_current }}
             - action: script.hems_evbox_set_current
               data:
                 current: "{{ states('input_number.hems_target_current') | int }}"
