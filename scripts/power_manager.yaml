@@ -97,13 +97,16 @@ hems_power_manager:
           Power Manager:
           {{ active_wallbox }}
           {{ current_current }}A → {{ target_current }}A
-
+          
     ###########################################################################
-    # Go-e
+    # Wallbox auswählen
     ###########################################################################
 
     - choose:
-
+    
+    ###########################################################################
+    # Go-e
+    ###########################################################################
         - conditions:
             - condition: template
               value_template: >
@@ -111,9 +114,9 @@ hems_power_manager:
 
           sequence:
 
-        - action: script.hems_goe_set_current
-          data:
-            current: "{{ target_current }}"
+          - action: script.hems_goe_set_current
+            data:
+              current: "{{ target_current }}"
 
         #######################################################################
         # EVBox
