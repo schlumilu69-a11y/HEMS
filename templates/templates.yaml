@@ -209,22 +209,20 @@
     
       state: >
     
-        {% set goe = states('binary_sensor.goe_082888_fsp') %}
-        {% set evbox = states('sensor.22052459_status_connector') %}
+        {% set goe_power = states('sensor.hems_goe_power') | float(0) %}
+        {% set evbox_power = states('sensor.hems_evbox_power') | float(0) %}
     
-        {% if goe == 'on' %}
-          Go-e
+        {% if goe_power > 500 and evbox_power > 500 %}
+          both
     
-        {% elif evbox in [
-              'Preparing',
-              'Charging',
-              'SuspendedEV',
-              'SuspendedEVSE'
-            ] %}
-          EVBox
+        {% elif goe_power > 500 %}
+          go-e
+    
+        {% elif evbox_power > 500 %}
+          evbox
     
         {% else %}
-          Keine
+          none
     
         {% endif %}
 
