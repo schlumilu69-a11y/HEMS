@@ -351,3 +351,31 @@
         {% else %}
           0
         {% endif %}
+
+###############################################################################
+# WALLBOX STATUS
+###############################################################################
+
+    - name: HEMS Wallbox Status
+      unique_id: hems_wallbox_status
+
+      state: >
+
+        {% set wallbox = states('sensor.hems_active_wallbox') %}
+
+        {% if wallbox == 'Go-e' %}
+
+          {% if is_state('binary_sensor.goe_082888_fsp','on') %}
+            Charging
+          {% else %}
+            Idle
+          {% endif %}
+
+        {% elif wallbox == 'EVBox' %}
+
+          {{ states('sensor.22052459_status_connector') }}
+
+        {% else %}
+          Idle
+
+        {% endif %}
