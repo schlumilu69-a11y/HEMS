@@ -121,7 +121,7 @@ hems_current_set:
           {{ ampere | int }}
 
         actual_current: >
-          {{ states('sensor.hems_wallbox_current') | int(0) }}
+          {{ states('number.goe_082888_amp') | int(0) }}
 
         min_current: >
           {{ states('input_number.hems_min_ampere') | int(6) }}
@@ -152,7 +152,7 @@ hems_current_set:
 
         - action: number.set_value
           target:
-            entity_id: sensor.hems_wallbox_current
+            entity_id: number.goe_082888_amp
           data:
             value: "{{ target_current }}"
 
