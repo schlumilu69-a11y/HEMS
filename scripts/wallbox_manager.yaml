@@ -1,0 +1,123 @@
+################################################################################
+# HEMS WALLBOX MANAGER
+################################################################################
+
+hems_wallbox_manager:
+
+  alias: HEMS - Wallbox Manager
+
+  mode: single
+
+  variables:
+
+    ###########################################################################
+    # Grid
+    ###########################################################################
+
+    grid_power: >
+      {{ states('sensor.hems_grid_power') | float(0) }}
+
+    stop_power: >
+      {{ states('input_number.hems_stop_power') | float(800) }}
+
+    ###########################################################################
+    # Go-e
+    ###########################################################################
+
+    goe_enabled: >
+      {{ is_state('input_boolean.hems_goe_enabled','on') }}
+
+    goe_charging: >
+      {{ is_state('binary_sensor.goe_082888_fsp','on') }}
+
+    ###########################################################################
+    # EVBox
+    ###########################################################################
+
+    evbox_enabled: >
+      {{ is_state('input_boolean.hems_evbox_enabled','on') }}
+
+    #
+    # Bitte später auf den richtigen Sensor ändern
+    #
+    evbox_charging: >
+      {{ is_state('binary_sensor.evbox_charging','on') }}
+
+  sequence:
+
+    ###########################################################################
+    # Keine Leistungsknappheit
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ grid_power <= stop_power }}
+
+      then:
+        - stop: "Keine Abschaltung erforderlich"
+
+    ###########################################################################
+    # Beide Wallboxen laden
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ goe_charging and evbox_charging }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Wallbox Manager:
+              Beide Wallboxen laden -> EVBox stoppen.
+
+        - action: script.hems_evbox_stop
+
+        - stop
+
+    ###########################################################################
+    # Nur Go-e lädt
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ goe_charging }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Wallbox Manager:
+              Nur Go-e lädt -> Go-e stoppen.
+
+        - action: script.hems_goe_stop
+
+        - stop
+
+    ###########################################################################
+    # Nur EVBox lädt
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ evbox_charging }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Wallbox Manager:
+              Nur EVBox lädt -> EVBox stoppen.
+
+        - action: script.hems_evbox_stop
