@@ -90,7 +90,7 @@ hems_evbox_set_current:
               EVBox:
               Ladestrom bereits {{ actual_current }} A
 
-        - stop
+        - stop "Keine Änderung erforderlich"
 
     ###########################################################################
     # Logging
