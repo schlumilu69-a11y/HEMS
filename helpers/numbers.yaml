@@ -100,7 +100,7 @@
     initial: 1
 
   hems_target_current:
-    name: Letzter Sollstrom
+    name: Ziel-Ladestrom
     min: 6
     max: 16
     step: 1
