@@ -35,3 +35,15 @@ hems_vehicle_priority:
 hems_power_manager_enabled:
   name: Power Manager aktiviert
   icon: mdi:lightning-bolt
+
+################################################################################
+# WALLBOX AUTO SELECTION
+################################################################################
+
+hems_auto_wallbox:
+
+  name: Wallbox automatisch auswählen
+
+  initial: true
+
+  icon: mdi:robot
