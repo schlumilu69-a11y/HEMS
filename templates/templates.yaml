@@ -327,3 +327,27 @@
         {% else %}
           0
         {% endif %}
+        
+###############################################################################
+# WALLBOX POWER
+###############################################################################
+
+    - name: HEMS Wallbox Power
+      unique_id: hems_wallbox_power
+      unit_of_measurement: W
+      device_class: power
+      state_class: measurement
+
+      state: >
+
+        {% set wallbox = states('sensor.hems_active_wallbox') %}
+
+        {% if wallbox == 'Go-e' %}
+          {{ states('sensor.hems_goe_power') | float(0) }}
+
+        {% elif wallbox == 'EVBox' %}
+          {{ states('sensor.hems_evbox_power') | float(0) }}
+
+        {% else %}
+          0
+        {% endif %}
