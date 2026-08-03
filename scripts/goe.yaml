@@ -1,123 +1,183 @@
 ################################################################################
-# HEMS WALLBOX MANAGER
+#
+# HEMS - GO-E DRIVER
+#
+# Version : 1.0.0
+#
+# Aufgabe:
+#   Hardwaretreiber für die Go-e Wallbox
+#
+# Der Treiber kennt KEINE Regelungslogik.
+# Er setzt ausschließlich Start/Stop, Ladestrom und Phasenmodus.
+#
 ################################################################################
 
-hems_wallbox_manager:
+################################################################################
+# START CHARGING
+################################################################################
 
-  alias: HEMS - Wallbox Manager
+hems_goe_start:
+
+  alias: HEMS - Go-e Start
 
   mode: single
 
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Go-e: Starte Ladevorgang"
+
+    - action: number.set_value
+      target:
+        entity_id: number.goe_082888_frc
+      data:
+        value: 2
+
+################################################################################
+# STOP CHARGING
+################################################################################
+
+hems_goe_stop:
+
+  alias: HEMS - Go-e Stop
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Go-e: Stoppe Ladevorgang"
+
+    - action: number.set_value
+      target:
+        entity_id: number.goe_082888_frc
+      data:
+        value: 1
+
+################################################################################
+# SET CURRENT
+################################################################################
+
+hems_goe_set_current:
+
+  alias: HEMS - Go-e Set Current
+
+  mode: restart
+
+  fields:
+
+    current:
+      description: Zielstrom in Ampere
+      example: 8
+
   variables:
 
-    ###########################################################################
-    # Grid
-    ###########################################################################
+    current: >
+      {{ current | int(6) }}
 
-    grid_power: >
-      {{ states('sensor.hems_grid_power') | float(0) }}
-
-    stop_power: >
-      {{ states('input_number.hems_stop_power') | float(800) }}
-
-    ###########################################################################
-    # Go-e
-    ###########################################################################
-
-    goe_enabled: >
-      {{ is_state('input_boolean.hems_goe_enabled','on') }}
-
-    goe_charging: >
-      {{ is_state('binary_sensor.goe_082888_fsp','on') }}
-
-    ###########################################################################
-    # EVBox
-    ###########################################################################
-
-    evbox_enabled: >
-      {{ is_state('input_boolean.hems_evbox_enabled','on') }}
-
-    #
-    # Bitte später auf den richtigen Sensor ändern
-    #
-    evbox_charging: >
-      {{ is_state('binary_sensor.evbox_charging','on') }}
+    current_actual: >
+      {{ states('number.goe_082888_amp') | int(6) }}
 
   sequence:
 
     ###########################################################################
-    # Keine Leistungsknappheit
+    # Keine Änderung erforderlich
     ###########################################################################
 
     - if:
 
         - condition: template
           value_template: >
-            {{ grid_power <= stop_power }}
-
-      then:
-        - stop: "Keine Abschaltung erforderlich"
-
-    ###########################################################################
-    # Beide Wallboxen laden
-    ###########################################################################
-
-    - if:
-
-        - condition: template
-          value_template: >
-            {{ goe_charging and evbox_charging }}
+            {{ current == current_actual }}
 
       then:
 
-        - action: script.hems_log
-          data:
-            message: >
-              Wallbox Manager:
-              Beide Wallboxen laden -> EVBox stoppen.
-
-        - action: script.hems_evbox_stop
-
-        - stop
+        - stop: "Go-e Strom bereits korrekt."
 
     ###########################################################################
-    # Nur Go-e lädt
+    # Logging
     ###########################################################################
 
-    - if:
-
-        - condition: template
-          value_template: >
-            {{ goe_charging }}
-
-      then:
-
-        - action: script.hems_log
-          data:
-            message: >
-              Wallbox Manager:
-              Nur Go-e lädt -> Go-e stoppen.
-
-        - action: script.hems_goe_stop
-
-        - stop
+    - action: script.hems_log
+      data:
+        message: >
+          Go-e:
+          {{ current_actual }}A → {{ current }}A
 
     ###########################################################################
-    # Nur EVBox lädt
+    # Strom setzen
     ###########################################################################
 
-    - if:
+    - action: number.set_value
+      target:
+        entity_id: number.goe_082888_amp
+      data:
+        value: "{{ current }}"
 
-        - condition: template
-          value_template: >
-            {{ evbox_charging }}
+################################################################################
+# FORCE 1 PHASE
+################################################################################
 
-      then:
+hems_goe_phase_1:
 
-        - action: script.hems_log
-          data:
-            message: >
-              Wallbox Manager:
-              Nur EVBox lädt -> EVBox stoppen.
+  alias: HEMS - Go-e Phase 1
 
-        - action: script.hems_evbox_stop
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Go-e: Umschalten auf 1 Phase"
+
+    - action: select.select_option
+      target:
+        entity_id: select.goe_082888_psm
+      data:
+        option: "1"
+
+################################################################################
+# FORCE 3 PHASE
+################################################################################
+
+hems_goe_phase_3:
+
+  alias: HEMS - Go-e Phase 3
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Go-e: Umschalten auf 3 Phasen"
+
+    - action: select.select_option
+      target:
+        entity_id: select.goe_082888_psm
+      data:
+        option: "2"
+
+################################################################################
+# AUTO
+################################################################################
+
+hems_goe_phase_auto:
+
+  alias: HEMS - Go-e Phase Auto
+
+  mode: single
+
+  sequence:
+
+    - action: script.hems_log
+      data:
+        message: "Go-e: Automatischer Phasenmodus"
+
+    - action: select.select_option
+      target:
+        entity_id: select.goe_082888_psm
+      data:
+        option: "0"
