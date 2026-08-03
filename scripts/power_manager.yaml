@@ -111,7 +111,9 @@ hems_power_manager:
 
           sequence:
 
-            - action: script.hems_goe_set_current
+        - action: script.hems_goe_set_current
+          data:
+            current: "{{ target_current }}"
 
         #######################################################################
         # EVBox
@@ -125,3 +127,5 @@ hems_power_manager:
           sequence:
 
             - action: script.hems_evbox_set_current
+              data:
+                current: "{{ target_current }}"
