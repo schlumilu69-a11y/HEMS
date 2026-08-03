@@ -79,7 +79,7 @@ hems_wallbox_manager:
 
         - action: script.hems_evbox_stop
 
-        - stop
+        - stop: "beide Wallboxen laden"
 
     ###########################################################################
     # Nur Go-e lädt
@@ -101,7 +101,7 @@ hems_wallbox_manager:
 
         - action: script.hems_goe_stop
 
-        - stop
+        - stop: "Nur Go-E Lädt"
 
     ###########################################################################
     # Nur EVBox lädt
