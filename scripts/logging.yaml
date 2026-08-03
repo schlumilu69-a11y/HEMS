@@ -30,3 +30,8 @@ hems_log:
         logger: hems
         message: >-
           [HEMS][{{ log_manager | upper }}] {{ log_text }}
+    - action: logbook.log
+      data:
+        name: HEMS
+        message: >-
+          [{{ log_manager | upper }}] {{ log_text }}
