@@ -1,5 +1,7 @@
 ################################################################################
+#
 # HEMS POWER MANAGER
+#
 ################################################################################
 
 hems_power_manager:
@@ -7,21 +9,15 @@ hems_power_manager:
   alias: HEMS - Power Manager
 
   mode: single
-  
-  fields:
-    
-    target_current:
-      description: Ziel-Ladestrom in Ampere
-      example: 8
-        
+
   variables:
 
     ###########################################################################
-    # Zielstrom
+    # Zielstrom aus HEMS
     ###########################################################################
 
     target_current: >
-      {{ target_current | int(6) }}
+      {{ states('input_number.hems_target_current') | int(6) }}
 
     ###########################################################################
     # Aktive Wallbox
@@ -31,7 +27,7 @@ hems_power_manager:
       {{ states('sensor.hems_active_wallbox') | lower }}
 
     ###########################################################################
-    # Aktueller Sollstrom der aktiven Wallbox
+    # Aktueller Sollstrom
     ###########################################################################
 
     current_current: >
@@ -66,7 +62,7 @@ hems_power_manager:
         - stop: "Keine aktive Ladung"
 
     ###########################################################################
-    # Keine Wallbox gewählt
+    # Keine Wallbox ausgewählt
     ###########################################################################
 
     - if:
@@ -77,7 +73,7 @@ hems_power_manager:
         - stop: "Keine aktive Wallbox"
 
     ###########################################################################
-    # Bereits korrekt
+    # Keine Änderung erforderlich
     ###########################################################################
 
     - if:
@@ -97,16 +93,13 @@ hems_power_manager:
           Power Manager:
           {{ active_wallbox }}
           {{ current_current }}A → {{ target_current }}A
-          
-    ###########################################################################
-    # Wallbox auswählen
-    ###########################################################################
 
-    - choose:
-    
     ###########################################################################
     # Go-e
     ###########################################################################
+
+    - choose:
+
         - conditions:
             - condition: template
               value_template: >
@@ -114,9 +107,9 @@ hems_power_manager:
 
           sequence:
 
-          - action: script.hems_goe_set_current
-            data:
-              current: "{{ target_current }}"
+            - action: script.hems_goe_set_current
+              data:
+                current: "{{ target_current }}"
 
         #######################################################################
         # EVBox
