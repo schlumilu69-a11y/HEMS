@@ -22,6 +22,16 @@ hems_controller:
   mode: single
 
   sequence:
+###############################################################################
+# Controllerlauf speichern
+###############################################################################
+
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.hems_last_controller_run
+
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
 ###############################################################################
 # INITIALISIERUNG
