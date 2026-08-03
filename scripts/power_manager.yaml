@@ -51,6 +51,15 @@ hems_power_manager:
 
   sequence:
 
+    - action: script.hems_log
+      data:
+        message: >
+          PM Start:
+          Wallbox={{ active_wallbox }}
+          Charging={{ charging }}
+          Target={{ target_current }}
+          Current={{ current_current }}
+
     ###########################################################################
     # Keine aktive Ladung
     ###########################################################################
