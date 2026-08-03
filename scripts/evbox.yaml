@@ -1,5 +1,7 @@
 ################################################################################
-# EVBOX DRIVER
+#
+# HEMS - EVBOX DRIVER
+#
 ################################################################################
 
 ################################################################################
@@ -10,14 +12,8 @@ hems_evbox_start:
 
   alias: HEMS - EVBox Start
 
-  mode: restart
-  
-  fields:
-  
-      current:
-        description: Zielstrom in Ampere
-        example: 8
-        
+  mode: single
+
   sequence:
 
     - action: script.hems_log
@@ -51,7 +47,7 @@ hems_evbox_stop:
     ###########################################################################
 
 ################################################################################
-# SET CURRENT
+# SET CHARGING CURRENT
 ################################################################################
 
 hems_evbox_set_current:
@@ -60,23 +56,61 @@ hems_evbox_set_current:
 
   mode: restart
 
+  fields:
+
+    current:
+      description: Zielstrom in Ampere
+      example: 8
+
   variables:
 
-    current: >
+    target_current: >
       {{ current | int(6) }}
 
+    actual_current: >
+      {{ states('sensor.22052459_current_offered') | int(0) }}
+
   sequence:
+
+    ###########################################################################
+    # Keine Änderung notwendig
+    ###########################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ actual_current == target_current }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              EVBox:
+              Ladestrom bereits {{ actual_current }} A
+
+        - stop
+
+    ###########################################################################
+    # Logging
+    ###########################################################################
 
     - action: script.hems_log
       data:
         message: >
-          EVBox: Setze Ladestrom auf {{ current }} A
+          EVBox:
+          Ladestrom {{ actual_current }} A → {{ target_current }} A
+
+    ###########################################################################
+    # OCPP
+    ###########################################################################
 
     - action: ocpp.set_charge_rate
       data:
         devid: "22052459"
-        limit_amps: "{{ current }}"
         conn_id: 1
+        limit_amps: "{{ target_current }}"
 
 ################################################################################
 # FORCE 1 PHASE
@@ -85,6 +119,8 @@ hems_evbox_set_current:
 hems_evbox_phase_1:
 
   alias: HEMS - EVBox Force 1 Phase
+
+  mode: single
 
   sequence:
 
@@ -101,12 +137,14 @@ hems_evbox_phase_3:
 
   alias: HEMS - EVBox Force 3 Phase
 
+  mode: single
+
   sequence:
 
     - action: script.hems_log
       data:
         message: >
-          EVBox arbeitet immer 3-phasig.
+          EVBox arbeitet permanent 3-phasig.
 
 ################################################################################
 # AUTO
@@ -115,6 +153,8 @@ hems_evbox_phase_3:
 hems_evbox_phase_auto:
 
   alias: HEMS - EVBox Phase Auto
+
+  mode: single
 
   sequence:
 
