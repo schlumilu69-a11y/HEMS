@@ -1,88 +1,203 @@
-alias: HEMS Controller V3
-description: Zentrale Regelung des HEMS
-mode: single
-
-trigger:
-
-  - platform: state
-    entity_id:
-      - sensor.hems_grid_power
-      - sensor.hems_available_power
-      - sensor.hems_active_wallbox
-
-  - platform: time_pattern
-    seconds: "/30"
-
-condition:
-
-  - condition: template
-    value_template: >
-      {{ states('sensor.hems_active_wallbox') != 'None' }}
-
-action:
-
+################################################################################
 #
-# Werte einlesen
+# HEMS - Home Energy Management System
 #
-
-- variables:
-
-    available: >
-      {{ states('sensor.hems_available_power') | float(0) }}
-
-    current:
-      "{{ states('input_number.hems_target_current') | int(6) }}"
-
-    deadband:
-      "{{ states('input_number.hems_deadband') | float(150) }}"
-
-    min_current:
-      "{{ states('input_number.hems_min_ampere') | int(6) }}"
-
-    max_current:
-      "{{ states('input_number.hems_max_ampere') | int(16) }}"
-
+# Version : 1.0.0 Beta
 #
-# Sollstrom berechnen
+# Datei : controller.yaml
 #
-
-- variables:
-
-    new_current: >
-
-      {% set amp = current %}
-
-      {% if available > deadband %}
-        {% set amp = amp + 1 %}
-      {% elif available < -deadband %}
-        {% set amp = amp - 1 %}
-      {% endif %}
-
-      {% if amp < min_current %}
-        {% set amp = min_current %}
-      {% endif %}
-
-      {% if amp > max_current %}
-        {% set amp = max_current %}
-      {% endif %}
-
-      {{ amp }}
-
+# Aufgabe:
 #
-# Nur schreiben wenn Änderung
+#   - Initialisierung
+#   - Statusprüfung
+#   - Wallboxauswahl
+#   - Start-/Stopentscheidung
 #
+################################################################################
 
-- if:
+hems_controller:
 
-    - condition: template
-      value_template: >
-        {{ new_current | int != current | int }}
+  alias: HEMS Controller
 
-  then:
+  mode: single
 
-    - service: input_number.set_value
-      target:
-        entity_id: input_number.hems_target_current
+  sequence:
 
+###############################################################################
+# INITIALISIERUNG
+###############################################################################
+
+    - variables:
+
+        #######################################################################
+        # HEMS
+        #######################################################################
+
+        hems_enabled: >
+          {{ is_state('input_boolean.hems_enabled','on') }}
+
+        #######################################################################
+        # Wallbox Auswahl
+        #######################################################################
+
+        wallbox_mode: >
+          {{ states('input_select.hems_controlled_wallbox') }}
+
+        active_wallbox: >
+          {{ states('sensor.hems_active_wallbox') }}
+
+        #######################################################################
+        # Fahrzeug
+        #######################################################################
+
+        vehicle_connected: >
+          {{ is_state('binary_sensor.hems_vehicle_connected','on') }}
+
+        charging_active: >
+          {{ is_state('binary_sensor.hems_charging_active','on') }}
+
+        #######################################################################
+        # Leistung
+        #######################################################################
+
+        available_power: >
+          {{ states('sensor.hems_available_power') | float(0) }}
+
+        wallbox_power: >
+          {{ states('sensor.hems_wallbox_power') | float(0) }}
+
+        wallbox_current: >
+          {{ states('sensor.hems_wallbox_current') | int(6) }}
+
+        #######################################################################
+        # Einstellungen
+        #######################################################################
+
+        start_power: >
+          {{ states('input_number.hems_start_power') | float(1500) }}
+
+        stop_power: >
+          {{ states('input_number.hems_stop_power') | float(800) }}
+
+        deadband: >
+          {{ states('input_number.hems_deadband') | float(150) }}
+
+        min_current: >
+          {{ states('input_number.hems_min_ampere') | int(6) }}
+
+        max_current: >
+          {{ states('input_number.hems_max_ampere') | int(16) }}
+
+###############################################################################
+# HEMS AKTIV?
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ not hems_enabled }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Controller: HEMS deaktiviert.
+
+        - stop: HEMS deaktiviert
+
+###############################################################################
+# FAHRZEUG VERBUNDEN?
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ not vehicle_connected }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Controller: Kein Fahrzeug verbunden.
+
+        - stop: Kein Fahrzeug
+
+###############################################################################
+# WALLBOX AUSWÄHLEN
+###############################################################################
+
+    - variables:
+
+        selected_wallbox: >
+
+          {% if wallbox_mode == 'Auto' %}
+            {{ active_wallbox }}
+          {% else %}
+            {{ wallbox_mode }}
+          {% endif %}
+
+###############################################################################
+# DEBUG
+###############################################################################
+
+    - action: script.hems_log
       data:
-        value: "{{ new_current }}"
+        message: >
+          Controller:
+          Wallbox={{ selected_wallbox }},
+          Available={{ available_power }}W,
+          Current={{ wallbox_current }}A
+
+###############################################################################
+# STARTBEDINGUNG
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{
+              not charging_active
+              and
+              available_power >= start_power
+            }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Controller:
+              Starte Ladevorgang.
+
+        - action: script.hems_charge_start
+
+###############################################################################
+# STOPBEDINGUNG
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{
+              charging_active
+              and
+              available_power <= (-stop_power)
+            }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Controller:
+              Stoppe Ladevorgang.
+
+        - action: script.hems_charge_stop
+
+        - stop: Ladung beendet
