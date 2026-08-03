@@ -315,3 +315,92 @@ hems_controller:
 
       data:
         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+###############################################################################
+# PHASE MANAGER
+###############################################################################
+
+    - if:
+
+        - condition: state
+          entity_id: input_boolean.hems_phase_switch_allowed
+          state: "on"
+
+      then:
+
+        - action: script.hems_phase_manager
+
+###############################################################################
+# WALLBOX MANAGER
+###############################################################################
+
+    - action: script.hems_wallbox_manager
+
+###############################################################################
+# CONTROLLER STATUS
+###############################################################################
+
+    - choose:
+
+        #######################################################################
+        # Lädt
+        #######################################################################
+
+        - conditions:
+
+            - condition: state
+              entity_id: binary_sensor.hems_charging_active
+              state: "on"
+
+          sequence:
+
+            - action: input_text.set_value
+              target:
+                entity_id: input_text.hems_controller_state
+              data:
+                value: "Charging"
+
+        #######################################################################
+        # Fahrzeug verbunden
+        #######################################################################
+
+        - conditions:
+
+            - condition: state
+              entity_id: binary_sensor.hems_vehicle_connected
+              state: "on"
+
+          sequence:
+
+            - action: input_text.set_value
+              target:
+                entity_id: input_text.hems_controller_state
+              data:
+                value: "Connected"
+
+      default:
+
+        - action: input_text.set_value
+          target:
+            entity_id: input_text.hems_controller_state
+          data:
+            value: "Idle"
+
+###############################################################################
+# DEBUG LOG
+###############################################################################
+
+    - action: script.hems_log
+      data:
+        message: >
+          Controller beendet |
+          Wallbox={{ selected_wallbox }} |
+          Leistung={{ available_power }}W |
+          Strom={{ wallbox_current }}A |
+          Ziel={{ target_current }}A
+
+###############################################################################
+# ENDE
+###############################################################################
+
+    - stop: Controller beendet
