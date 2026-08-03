@@ -22,6 +22,9 @@ hems_controller:
   mode: single
 
   sequence:
+    - action: script.hems_log
+      data:
+        message: "Controller gestartet"
 ###############################################################################
 # Controllerlauf speichern
 ###############################################################################
