@@ -201,3 +201,117 @@ hems_controller:
         - action: script.hems_charge_stop
 
         - stop: Ladung beendet
+
+###############################################################################
+# HOLD TIME PRÜFEN
+###############################################################################
+
+    - variables:
+
+        hold_time: >
+          {{ states('input_number.hems_current_hold_time') | int(120) }}
+
+        last_change: >
+          {{ states('input_datetime.hems_last_current_change') }}
+
+        seconds_since_change: >
+
+          {% if last_change in ['unknown','unavailable',''] %}
+            9999
+          {% else %}
+            {{ (as_timestamp(now()) - as_timestamp(last_change)) | int }}
+          {% endif %}
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ seconds_since_change < hold_time }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Controller:
+              Hold-Time aktiv ({{ seconds_since_change }}s / {{ hold_time }}s)
+
+        - stop: Hold-Time aktiv
+
+###############################################################################
+# SOLLSTROM BERECHNEN
+###############################################################################
+
+    - variables:
+
+        target_current: >
+
+          {% set amp = wallbox_current %}
+
+          {% if available_power > deadband %}
+            {% set amp = amp + 1 %}
+          {% elif available_power < (-deadband) %}
+            {% set amp = amp - 1 %}
+          {% endif %}
+
+          {% if amp < min_current %}
+            {% set amp = min_current %}
+          {% endif %}
+
+          {% if amp > max_current %}
+            {% set amp = max_current %}
+          {% endif %}
+
+          {{ amp }}
+
+###############################################################################
+# KEINE ÄNDERUNG ERFORDERLICH
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ target_current | int == wallbox_current | int }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            message: >
+              Controller:
+              Sollstrom bereits korrekt
+              ({{ wallbox_current }} A)
+
+        - stop: Keine Änderung erforderlich
+
+###############################################################################
+# DEBUG
+###############################################################################
+
+    - action: script.hems_log
+      data:
+        message: >
+          Controller:
+          Available={{ available_power }}W |
+          Current={{ wallbox_current }}A |
+          Target={{ target_current }}A
+
+###############################################################################
+# POWER MANAGER
+###############################################################################
+
+    - action: script.hems_power_manager
+      data:
+        target_current: "{{ target_current }}"
+
+###############################################################################
+# ZEITSTEMPEL AKTUALISIEREN
+###############################################################################
+
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.hems_last_current_change
+
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
