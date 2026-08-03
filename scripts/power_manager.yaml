@@ -13,7 +13,7 @@ hems_power_manager:
       target_current:
         description: Ziel-Ladestrom in Ampere
         example: 8
-    variables:
+  variables:
 
     ###########################################################################
     # Zielstrom
