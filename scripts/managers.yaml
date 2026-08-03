@@ -1,5 +1,7 @@
 ################################################################################
+#
 # HEMS START MANAGER
+#
 ################################################################################
 
 hems_start_manager:
@@ -8,48 +10,14 @@ hems_start_manager:
 
   mode: single
 
-  variables:
-
-    charging: >
-      {{ is_state('binary_sensor.hems_charging_active','on') }}
-
-    start_power: >
-      {{ states('input_number.hems_start_power') | float(2500) }}
-
-    available_power: >
-      {{ states('sensor.hems_available_power') | float(0) }}
-
   sequence:
 
-    ###########################################################################
-    # Lädt bereits
-    ###########################################################################
-
-    - if:
-        - condition: template
-          value_template: "{{ charging }}"
-      then:
-        - stop: "Ladevorgang bereits aktiv"
-
-    ###########################################################################
-    # Zu wenig Überschuss
-    ###########################################################################
-
-    - if:
-        - condition: template
-          value_template: >
-            {{ available_power < start_power }}
-      then:
-        - stop: "Zu wenig PV-Leistung"
-
-    ###########################################################################
-    # Wallbox Manager entscheidet
-    ###########################################################################
-
-    - action: script.hems_wallbox_manager
+    - action: script.hems_charge_start
 
 ################################################################################
+#
 # HEMS STOP MANAGER
+#
 ################################################################################
 
 hems_stop_manager:
@@ -58,25 +26,6 @@ hems_stop_manager:
 
   mode: single
 
-  variables:
-
-    charging: >
-      {{ is_state('binary_sensor.hems_charging_active','on') }}
-
   sequence:
 
-    ###########################################################################
-    # Keine Ladung
-    ###########################################################################
-
-    - if:
-        - condition: template
-          value_template: "{{ not charging }}"
-      then:
-        - stop: "Keine aktive Ladung"
-
-    ###########################################################################
-    # Übergabe an Wallbox Manager
-    ###########################################################################
-
-    - action: script.hems_wallbox_manager
+    - action: script.hems_charge_stop
