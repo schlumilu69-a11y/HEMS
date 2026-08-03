@@ -115,7 +115,7 @@ hems_controller:
             message: >
               Controller: HEMS deaktiviert.
 
-        - stop: HEMS deaktiviert
+        - stop: "HEMS deaktiviert"
 
 ###############################################################################
 # FAHRZEUG VERBUNDEN?
@@ -210,7 +210,7 @@ hems_controller:
 
         - action: script.hems_charge_stop
 
-        - stop: Ladung beendet
+        - stop: "Ladung beendet"
 
 ###############################################################################
 # HOLD TIME PRÜFEN
@@ -246,7 +246,7 @@ hems_controller:
               Controller:
               Hold-Time aktiv ({{ seconds_since_change }}s / {{ hold_time }}s)
 
-        - stop: Hold-Time aktiv
+        - stop: "Hold-Time aktiv"
 
 ###############################################################################
 # SOLLSTROM BERECHNEN
@@ -293,7 +293,7 @@ hems_controller:
               Sollstrom bereits korrekt
               ({{ wallbox_current }} A)
 
-        - stop: Keine Änderung erforderlich
+        - stop: "Keine Änderung erforderlich"
 
 ###############################################################################
 # DEBUG
@@ -413,4 +413,4 @@ hems_controller:
 # ENDE
 ###############################################################################
 
-    - stop: Controller beendet
+    - stop: "Controller beendet"
