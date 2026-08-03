@@ -41,7 +41,8 @@ hems_wallbox_manager:
     # Bitte später auf den richtigen Sensor ändern
     #
     evbox_charging: >
-      {{ is_state('binary_sensor.evbox_charging','on') }}
+      {% set state = states('sensor.22052459_status_connector') %}
+      {{ state in ['Charging', 'Preparing', 'SuspendedEV'] }}
 
   sequence:
 
