@@ -8,12 +8,12 @@ hems_power_manager:
 
   mode: single
   
-    fields:
+  fields:
     
-        target_current:
-          description: Ziel-Ladestrom in Ampere
-          example: 8
-      variables:
+      target_current:
+        description: Ziel-Ladestrom in Ampere
+        example: 8
+    variables:
 
     ###########################################################################
     # Zielstrom
