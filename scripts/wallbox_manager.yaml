@@ -1,5 +1,12 @@
 ################################################################################
+#
 # HEMS WALLBOX MANAGER
+#
+# Aufgabe:
+#   - Priorisierung mehrerer Wallboxen
+#   - Stopentscheidung erst bei Mindeststrom
+#   - Go-e zuerst auf 1 Phase umschalten
+#
 ################################################################################
 
 hems_wallbox_manager:
@@ -10,75 +17,144 @@ hems_wallbox_manager:
 
   variables:
 
-    ###########################################################################
-    # Grid
-    ###########################################################################
+    active_wallbox: >
+      {{ states('sensor.hems_active_wallbox') | lower }}
 
-    grid_power: >
-      {{ states('sensor.hems_grid_power') | float(0) }}
+    wallbox_current: >
+      {{ states('sensor.hems_wallbox_current') | int(0) }}
+
+    min_current: >
+      {{ states('input_number.hems_min_current') | int(6) }}
+
+    available_power: >
+      {{ states('sensor.hems_available_power') | float(0) }}
 
     stop_power: >
       {{ states('input_number.hems_stop_power') | float(800) }}
 
-    ###########################################################################
-    # Go-e
-    ###########################################################################
-
-    goe_enabled: >
-      {{ is_state('input_boolean.hems_goe_enabled','on') }}
-
     goe_charging: >
       {{ states('sensor.goe_082888_car_value') == 'Lädt' }}
 
-    ###########################################################################
-    # EVBox
-    ###########################################################################
-
-    evbox_enabled: >
-      {{ is_state('input_boolean.hems_evbox_enabled','on') }}
-
-    #
-    # Bitte später auf den richtigen Sensor ändern
-    #
     evbox_charging: >
       {% set state = states('sensor.22052459_status_connector') %}
-      {{ state in ['Charging', 'Preparing', 'SuspendedEV'] }}
+      {{ state in ['Charging','Preparing','SuspendedEV'] }}
+
+    goe_phase_mode: >
+      {{ states('select.goe_082888_psm') }}
 
   sequence:
 
-    ###########################################################################
-    # Keine Leistungsknappheit
-    ###########################################################################
+###############################################################################
+# Nur eingreifen wenn beide Wallboxen gleichzeitig laden
+###############################################################################
 
     - if:
 
         - condition: template
           value_template: >
-            {{ grid_power <= stop_power }}
+            {{ not (goe_charging and evbox_charging) }}
 
       then:
-        - stop: "Keine Abschaltung erforderlich"
 
-    ###########################################################################
-    # Beide Wallboxen laden
-    ###########################################################################
+        - stop: "Nur eine Wallbox aktiv"
+
+###############################################################################
+# Noch nicht Mindeststrom erreicht
+###############################################################################
 
     - if:
 
         - condition: template
           value_template: >
-            {{ goe_charging and evbox_charging }}
+            {{ wallbox_current > min_current }}
+
+      then:
+
+        - stop: "Regelung übernimmt Power Manager"
+
+###############################################################################
+# Noch genügend PV vorhanden
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ available_power > (-stop_power) }}
+
+      then:
+
+        - stop: "Keine Abschaltung erforderlich"
+
+###############################################################################
+# Go-e zuerst auf 1 Phase
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{
+              active_wallbox == 'go-e'
+              and
+              goe_phase_mode != '1-phasig'
+            }}
 
       then:
 
         - action: script.hems_log
           data:
+            manager: WALLBOX
             message: >
-              Wallbox Manager:
-              Beide Wallboxen laden -> EVBox stoppen.
+              Go-e bei Mindeststrom.
+              Starte Phasenwechsel.
 
-        - action: script.hems_evbox_stop
+        - action: script.hems_phase_manager
 
-        - stop: "beide Wallboxen laden"
+        - stop: "Phasenwechsel"
 
-  
+###############################################################################
+# EVBox stoppen
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ active_wallbox == 'evbox' }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            manager: WALLBOX
+            message: >
+              EVBox bei Mindeststrom.
+              Stoppe Ladevorgang.
+
+        - action: script.hems_stop_manager
+
+        - stop: "EVBox gestoppt"
+
+###############################################################################
+# Go-e stoppen
+###############################################################################
+
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ active_wallbox == 'go-e' }}
+
+      then:
+
+        - action: script.hems_log
+          data:
+            manager: WALLBOX
+            message: >
+              Go-e bereits 1-phasig.
+              Stoppe Ladevorgang.
+
+        - action: script.hems_stop_manager
+
+        - stop: "Go-e gestoppt"
