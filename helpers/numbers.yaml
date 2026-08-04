@@ -115,7 +115,7 @@
     step: 30
     unit_of_measurement: s
     mode: slider
-    initial: 120
+    initial: 60
 
   ##############################################################################
   # Phase Switching
