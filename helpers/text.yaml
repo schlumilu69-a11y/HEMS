@@ -7,3 +7,7 @@ hems_controller_state:
   name: HEMS Controller Status
   max: 50
   initial: Idle
+
+hems_last_decision:
+  name: HEMS Letzte Entscheidung
+  max: 100
