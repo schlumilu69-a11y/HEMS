@@ -25,11 +25,11 @@ hems_controller:
     - action: script.hems_log
       data:
         message: "Controller gestartet"
-   - action: input_datetime.set_datetime
-     target:
-      entity_id: input_datetime.hems_last_controller_run
-    data:
-      datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.hems_last_controller_run
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 ###############################################################################
 # Controllerlauf speichern
 ###############################################################################
