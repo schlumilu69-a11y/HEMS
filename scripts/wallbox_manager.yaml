@@ -144,11 +144,10 @@ hems_wallbox_manager:
 
         - condition: template
           value_template: >
-            {{
-          active_wallbox == 'go-e'
-          and
-          goe_phase_mode == 1
-        }}
+            {{ active_wallbox == 'go-e'
+            and
+            goe_phase_mode == 1
+            }}
 
       then:
 
