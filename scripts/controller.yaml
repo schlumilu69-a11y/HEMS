@@ -129,24 +129,6 @@ hems_controller:
 
         - stop: "HEMS deaktiviert"
 
-###############################################################################
-# FAHRZEUG VERBUNDEN?
-###############################################################################
-
-    - if:
-
-        - condition: template
-          value_template: >
-            {{ not vehicle_connected }}
-
-      then:
-
-        - action: script.hems_log
-          data:
-            message: >
-              Controller: Kein Fahrzeug verbunden.
-
-        - stop: Kein Fahrzeug
 
 ###############################################################################
 # WALLBOX AUSWÄHLEN
