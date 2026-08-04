@@ -181,30 +181,33 @@ hems_controller:
         - action: script.hems_charge_start
 
 ###############################################################################
-# STOPBEDINGUNG
+# STOP NUR BEI MINIMALEM LADESTROM
 ###############################################################################
 
-    - if:
+- if:
 
-        - condition: template
-          value_template: >
-            {{
-              charging_active
-              and
-              available_power <= (-stop_power)
-            }}
+    - condition: template
+      value_template: >
+        {{
+          available_power < (-stop_power)
+          and
+          wallbox_current <= min_current
+        }}
 
-      then:
+  then:
 
-        - action: script.hems_log
-          data:
-            message: >
-              Controller:
-              Stoppe Ladevorgang.
+    - action: script.hems_log
+      data:
+        manager: CONTROLLER
+        level: warning
+        message: >
+          Stoppe Ladevorgang.
+          Netzbezug={{ grid_power }}W
+          Strom={{ wallbox_current }}A
 
-        - action: script.hems_charge_stop
+    - action: script.hems_stop_manager
 
-        - stop: "Ladung beendet"
+    - stop: "Ladung wird gestoppt - Minimaler Ladestrom"
 
 ###############################################################################
 # HOLD TIME PRÜFEN
