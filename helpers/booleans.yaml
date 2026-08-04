@@ -43,7 +43,10 @@ hems_power_manager_enabled:
 hems_auto_wallbox:
 
   name: Wallbox automatisch auswählen
-
   initial: true
-
   icon: mdi:robot
+
+hems_phase_switch_allowed:
+
+  name: HEMS Phase Switch Allowed
+  initial: true
