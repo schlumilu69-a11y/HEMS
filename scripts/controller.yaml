@@ -30,6 +30,10 @@ hems_controller:
         entity_id: input_datetime.hems_last_controller_run
       data:
         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+    - action: persistent_notification.create
+      data:
+        title: HEMS
+        message: Controller gestartet
 ###############################################################################
 # Controllerlauf speichern
 ###############################################################################
