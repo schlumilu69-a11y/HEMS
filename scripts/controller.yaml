@@ -2,16 +2,14 @@
 #
 # HEMS - Home Energy Management System
 #
-# Version : 1.0.0 Beta
-#
 # Datei : controller.yaml
 #
 # Aufgabe:
-#
 #   - Initialisierung
 #   - Statusprüfung
-#   - Wallboxauswahl
-#   - Start-/Stopentscheidung
+#   - Sollstrom berechnen
+#   - Power Manager aufrufen
+#   - Wallbox Manager nur bei Mindeststrom
 #
 ################################################################################
 
@@ -22,26 +20,19 @@ hems_controller:
   mode: restart
 
   sequence:
+
+###############################################################################
+# START
+###############################################################################
+
     - action: script.hems_log
       data:
+        manager: CONTROLLER
         message: "Controller gestartet"
-    - action: input_datetime.set_datetime
-      target:
-        entity_id: input_datetime.hems_last_controller_run
-      data:
-        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
-    - action: persistent_notification.create
-      data:
-        title: HEMS
-        message: Controller gestartet
-###############################################################################
-# Controllerlauf speichern
-###############################################################################
 
     - action: input_datetime.set_datetime
       target:
         entity_id: input_datetime.hems_last_controller_run
-
       data:
         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
@@ -51,16 +42,8 @@ hems_controller:
 
     - variables:
 
-        #######################################################################
-        # HEMS
-        #######################################################################
-
         hems_enabled: >
           {{ is_state('input_boolean.hems_enabled','on') }}
-
-        #######################################################################
-        # Wallbox Auswahl
-        #######################################################################
 
         wallbox_mode: >
           {{ states('input_select.hems_controlled_wallbox') }}
@@ -68,32 +51,14 @@ hems_controller:
         active_wallbox: >
           {{ states('sensor.hems_active_wallbox') }}
 
-        #######################################################################
-        # Fahrzeug
-        #######################################################################
-
-        vehicle_connected: >
-          {{ is_state('binary_sensor.hems_vehicle_connected','on') }}
-
         charging_active: >
           {{ is_state('binary_sensor.hems_charging_active','on') }}
-
-        #######################################################################
-        # Leistung
-        #######################################################################
 
         available_power: >
           {{ states('sensor.hems_available_power') | float(0) }}
 
-        wallbox_power: >
-          {{ states('sensor.hems_wallbox_power') | float(0) }}
-
         wallbox_current: >
           {{ states('sensor.hems_wallbox_current') | int(6) }}
-
-        #######################################################################
-        # Einstellungen
-        #######################################################################
 
         start_power: >
           {{ states('input_number.hems_start_power') | float(1500) }}
@@ -117,18 +82,16 @@ hems_controller:
     - if:
 
         - condition: template
-          value_template: >
-            {{ not hems_enabled }}
+          value_template: "{{ not hems_enabled }}"
 
       then:
 
         - action: script.hems_log
           data:
-            message: >
-              Controller: HEMS deaktiviert.
+            manager: CONTROLLER
+            message: "HEMS deaktiviert."
 
         - stop: "HEMS deaktiviert"
-
 
 ###############################################################################
 # WALLBOX AUSWÄHLEN
@@ -137,7 +100,6 @@ hems_controller:
     - variables:
 
         selected_wallbox: >
-
           {% if wallbox_mode == 'Auto' %}
             {{ active_wallbox }}
           {% else %}
@@ -150,14 +112,14 @@ hems_controller:
 
     - action: script.hems_log
       data:
+        manager: CONTROLLER
         message: >
-          Controller:
           Wallbox={{ selected_wallbox }},
           Available={{ available_power }}W,
           Current={{ wallbox_current }}A
 
 ###############################################################################
-# STARTBEDINGUNG
+# START MANAGER
 ###############################################################################
 
     - if:
@@ -172,30 +134,21 @@ hems_controller:
 
       then:
 
-        - action: script.hems_log
-          data:
-            message: >
-              Controller:
-              Starte Ladevorgang.
-
-        - action: script.hems_charge_start
-
-
+        - action: script.hems_start_manager
 
 ###############################################################################
-# HOLD TIME PRÜFEN
+# HOLD TIME
 ###############################################################################
 
     - variables:
 
         hold_time: >
-          {{ states('input_number.hems_current_hold_time') | int(120) }}
+          {{ states('input_number.hems_current_hold_time') | int(60) }}
 
         last_change: >
           {{ states('input_datetime.hems_last_current_change') }}
 
         seconds_since_change: >
-
           {% if last_change in ['unknown','unavailable',''] %}
             9999
           {% else %}
@@ -212,8 +165,8 @@ hems_controller:
 
         - action: script.hems_log
           data:
+            manager: CONTROLLER
             message: >
-              Controller:
               Hold-Time aktiv ({{ seconds_since_change }}s / {{ hold_time }}s)
 
         - stop: "Hold-Time aktiv"
@@ -245,7 +198,7 @@ hems_controller:
           {{ amp }}
 
 ###############################################################################
-# Sollstrom im HEMS speichern
+# HELPER AKTUALISIEREN
 ###############################################################################
 
     - action: input_number.set_value
@@ -255,14 +208,7 @@ hems_controller:
         value: "{{ target_current }}"
 
 ###############################################################################
-# Sollstrom im HEMS speichern
-#
-# Zentrale Übergabe des berechneten Sollstroms.
-# Alle nachfolgenden Manager und Treiber lesen ausschließlich diesen Helper.
-###############################################################################
-
-###############################################################################
-# KEINE ÄNDERUNG ERFORDERLICH
+# KEINE ÄNDERUNG
 ###############################################################################
 
     - if:
@@ -275,14 +221,10 @@ hems_controller:
 
         - action: script.hems_log
           data:
+            manager: CONTROLLER
             message: >
-              Controller:
               Sollstrom bereits korrekt
               ({{ wallbox_current }} A)
-              WB={{ wallbox_current }}
-              AP={{ available_power }}
-              Target={{ target_current }}
-              Deadband={{ deadband }}
 
         - stop: "Keine Änderung erforderlich"
 
@@ -292,8 +234,8 @@ hems_controller:
 
     - action: script.hems_log
       data:
+        manager: CONTROLLER
         message: >
-          Controller:
           Available={{ available_power }}W |
           Current={{ wallbox_current }}A |
           Target={{ target_current }}A
@@ -311,39 +253,28 @@ hems_controller:
     - action: input_datetime.set_datetime
       target:
         entity_id: input_datetime.hems_last_current_change
-
       data:
         datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
-
-###############################################################################
-# PHASE MANAGER
-###############################################################################
-
-    - if:
-
-        - condition: state
-          entity_id: input_boolean.hems_phase_switch_allowed
-          state: "on"
-
-      then:
-
-        - action: script.hems_phase_manager
 
 ###############################################################################
 # WALLBOX MANAGER
 ###############################################################################
 
-    - action: script.hems_wallbox_manager
+    - if:
+
+        - condition: template
+          value_template: >
+            {{ wallbox_current | int <= min_current }}
+
+      then:
+
+        - action: script.hems_wallbox_manager
 
 ###############################################################################
-# CONTROLLER STATUS
+# STATUS
 ###############################################################################
 
     - choose:
-
-        #######################################################################
-        # Lädt
-        #######################################################################
 
         - conditions:
 
@@ -358,10 +289,6 @@ hems_controller:
                 entity_id: input_text.hems_controller_state
               data:
                 value: "Charging"
-
-        #######################################################################
-        # Fahrzeug verbunden
-        #######################################################################
 
         - conditions:
 
@@ -386,20 +313,17 @@ hems_controller:
             value: "Idle"
 
 ###############################################################################
-# DEBUG LOG
+# ENDE
 ###############################################################################
 
     - action: script.hems_log
       data:
+        manager: CONTROLLER
         message: >
           Controller beendet |
           Wallbox={{ selected_wallbox }} |
           Leistung={{ available_power }}W |
           Strom={{ wallbox_current }}A |
           Ziel={{ target_current }}A
-
-###############################################################################
-# ENDE
-###############################################################################
 
     - stop: "Controller beendet"
