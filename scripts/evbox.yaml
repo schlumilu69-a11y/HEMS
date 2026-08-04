@@ -39,12 +39,14 @@ hems_evbox_stop:
 
     - action: script.hems_log
       data:
-        message: "EVBox: Stoppe Ladevorgang"
+        manager: EVBOX
+        message: "EVBox: Stoppe Ladevorgang (1A)"
 
-    ###########################################################################
-    # TODO:
-    # EVBox Stop Service ergänzen
-    ###########################################################################
+    - action: ocpp.set_charge_rate
+      data:
+        devid: "22052459"
+        conn_id: 1
+        limit_amps: 1
 
 ################################################################################
 # SET CHARGING CURRENT
