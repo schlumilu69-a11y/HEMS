@@ -41,18 +41,46 @@ hems_charge_stop:
 
   mode: single
 
+  variables:
+
+    active_wallbox: >
+      {{ states('sensor.hems_active_wallbox') | lower }}
+
   sequence:
 
     - action: script.hems_log
       data:
-        message: "Stopping charging"
+        manager: STOP
+        message: >
+          Stoppe {{ active_wallbox }}
 
-    # Wallbox stoppen
-    - action: number.set_value
-      target:
-        entity_id: number.goe_082888_frc
-      data:
-        value: 1
+    - choose:
+
+        #######################################################################
+        # GO-E
+        #######################################################################
+
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ active_wallbox == 'go-e' }}
+
+          sequence:
+
+            - action: script.hems_goe_stop
+
+        #######################################################################
+        # EVBOX
+        #######################################################################
+
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ active_wallbox == 'evbox' }}
+
+          sequence:
+
+            - action: script.hems_evbox_stop
 
 ################################################################################
 # CHARGE PAUSE
