@@ -216,7 +216,7 @@ hems_controller:
     - variables:
 
         hold_time: >
-          {{ states('input_number.hems_current_hold_time') | int(60) }}
+          {{ states('input_number.hems_current_hold_time') | int(120) }}
 
         last_change: >
           {{ states('input_datetime.hems_last_current_change') }}
