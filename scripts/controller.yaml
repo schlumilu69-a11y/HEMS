@@ -303,6 +303,10 @@ hems_controller:
               Controller:
               Sollstrom bereits korrekt
               ({{ wallbox_current }} A)
+              WB={{ wallbox_current }}
+              AP={{ available_power }}
+              Target={{ target_current }}
+              Deadband={{ deadband }}
 
         - stop: "Keine Änderung erforderlich"
 
