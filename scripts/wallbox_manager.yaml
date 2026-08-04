@@ -97,7 +97,7 @@ hems_wallbox_manager:
             {{
               active_wallbox == 'go-e'
               and
-              goe_phase_mode != '1-phasig'
+              goe_phase_mode != '2'
             }}
 
       then:
