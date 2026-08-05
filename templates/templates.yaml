@@ -357,3 +357,39 @@
       state: >
         {{ states('sensor.hems_charging_power') | float(0) > 100 }}
 
+###########################################################################
+# Connected Wallbox
+###########################################################################
+
+    - name: HEMS Connected Wallbox
+      unique_id: hems_connected_wallbox
+
+      state: >
+
+        {% set goe_connected =
+             is_state('binary_sensor.goe_082888_fsp','on') %}
+
+        {% set evbox_state =
+             states('sensor.22052459_status_connector') %}
+
+        {% set evbox_connected =
+             evbox_state in [
+               'Preparing',
+               'Charging',
+               'SuspendedEV',
+               'SuspendedEVSE'
+             ] %}
+
+        {% if goe_connected and evbox_connected %}
+          both
+
+        {% elif goe_connected %}
+          go-e
+
+        {% elif evbox_connected %}
+          evbox
+
+        {% else %}
+          none
+
+        {% endif %}
