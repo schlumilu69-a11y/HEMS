@@ -205,7 +205,7 @@
     
       state: >
         {{
-          states('sensor.hems_goe_power')|float(0)
+          states('sensor.hems_go_e_power')|float(0)
           +
           states('sensor.hems_evbox_power')|float(0)
         }}
@@ -218,7 +218,7 @@
     
       state: >
     
-        {% set goe_power = states('sensor.hems_goe_power') | float(0) %}
+        {% set goe_power = states('sensor.hems_go_e_power') | float(0) %}
         {% set evbox_power = states('sensor.hems_evbox_power') | float(0) %}
     
         {% if goe_power > 500 and evbox_power > 500 %}
@@ -293,7 +293,7 @@
         {% set wallbox = states('sensor.hems_active_wallbox') %}
 
         {% if wallbox == 'Go-e' %}
-          {{ states('sensor.hems_goe_power') | float(0) }}
+          {{ states('sensor.hems_go_e_power') | float(0) }}
 
         {% elif wallbox == 'EVBox' %}
           {{ states('sensor.hems_evbox_power') | float(0) }}
