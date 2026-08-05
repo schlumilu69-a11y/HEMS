@@ -99,11 +99,14 @@ hems_controller:
 
     - variables:
 
+        connected_wallbox: >
+          {{ states('sensor.hems_connected_wallbox') }}
+
         selected_wallbox: >
           {% if wallbox_mode == 'Auto' %}
-            {{ active_wallbox }}
+           {{ connected_wallbox }}
           {% else %}
-            {{ wallbox_mode }}
+            {{ wallbox_mode | lower }}
           {% endif %}
 
 ###############################################################################
