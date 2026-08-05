@@ -226,7 +226,13 @@ hems_controller:
               Sollstrom bereits korrekt
               ({{ wallbox_current }} A)
 
-        - stop: "Keine Änderung erforderlich"
+        - action: script.hems_power_manager
+
+        - action: input_datetime.set_datetime
+          target:
+            entity_id: input_datetime.hems_last_current_change
+          data:
+            datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
 
 ###############################################################################
 # DEBUG
