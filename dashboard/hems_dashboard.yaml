@@ -5,174 +5,174 @@ views:
     path: overview
     icon: mdi:home-lightning-bolt
 
-cards:
-
-###############################################################################
-# ENERGIE
-###############################################################################
-
-  - type: entities
-    title: ⚡ Energie
-    show_header_toggle: false
-
-    entities:
-
-      - entity: sensor.hems_grid_power
-        name: Netzbezug / Einspeisung
-
-      - entity: sensor.hems_available_power
-        name: Verfügbare Ladeleistung
-
-      - entity: sensor.hems_active_wallbox
-        name: Aktive Wallbox
-
-      - entity: binary_sensor.hems_charging_active
-        name: Laden aktiv
-
-###############################################################################
-# CONTROLLER
-###############################################################################
-
-  - type: entities
-    title: 🧠 Controller
-    show_header_toggle: false
-
-    entities:
-
-      - entity: input_select.hems_controlled_wallbox
-        name: Gesteuerte Wallbox
-
-      - entity: input_select.hems_wallbox_mode
-        name: Lademodus
-
-      - entity: input_select.hems_wallbox_priority
-        name: Priorität
-
-      - entity: input_datetime.hems_last_controller_run
-        name: Letzter Lauf
-
-      - entity: input_datetime.hems_last_current_change
-        name: Letzte Stromänderung
-
-###############################################################################
-# REGELUNG
-###############################################################################
-
-  - type: entities
-    title: 🎯 Regelung
-    show_header_toggle: false
-
-    entities:
-
-      - entity: input_number.hems_start_power
-        name: Startleistung
-
-      - entity: input_number.hems_stop_power
-        name: Stoppleistung
-
-      - entity: input_number.hems_deadband
-        name: Totzone
-
-      - entity: input_number.hems_power_reserve
-        name: Leistungsreserve
-
-      - entity: input_number.hems_current_step
-        name: Stromänderung
-
-      - entity: input_number.hems_current_hold_time
-        name: Hold Time
-
-###############################################################################
-# GO-E
-###############################################################################
-
-  - type: entities
-    title: 🔋 Go-e
-    show_header_toggle: false
-
-    entities:
-
-      - entity: input_boolean.hems_goe_enabled
-        name: Aktiv
-
-      - entity: sensor.hems_go_e_power
-        name: Ladeleistung
-
-      - entity: number.goe_082888_amp
-        name: Sollstrom
-
-      - entity: binary_sensor.goe_082888_fsp
-        name: Lädt
-
-      - entity: select.goe_082888_psm
-        name: Phasenmodus
-
-###############################################################################
-# EVBOX
-###############################################################################
-
-  - type: entities
-    title: 🚗 EVBox
-    show_header_toggle: false
-
-    entities:
-
-      - entity: input_boolean.hems_evbox_enabled
-        name: Aktiv
-
-      - entity: sensor.hems_evbox_power
-        name: Ladeleistung
-
-      - entity: sensor.22052459_current_offered
-        name: Sollstrom
-
-      - entity: sensor.22052459_current_import
-        name: Iststrom
-
-      - entity: sensor.22052459_status_connector
-        name: Status
-
-###############################################################################
-# DEBUG
-###############################################################################
-
-  - type: entities
-    title: 🛠 Debug
-    show_header_toggle: false
-    state_color: true
-
-    entities:
-
-      - entity: sensor.hems_grid_power
-
-      - entity: sensor.hems_available_power
-
-      - entity: sensor.hems_active_wallbox
-
-      - entity: sensor.hems_wallbox_power
-
-      - entity: sensor.hems_wallbox_current
-
-      - entity: binary_sensor.hems_charging_active
-
-###############################################################################
-# TEST
-###############################################################################
-
-  - type: entities
-    title: ▶ Testfunktionen
-    show_header_toggle: false
-
-    entities:
-
-      - entity: script.hems_controller
-
-      - entity: script.hems_charge_start
-
-      - entity: script.hems_charge_stop
-
-      - entity: script.hems_power_manager
-
-      - entity: script.hems_phase_manager
-
-      - entity: script.hems_wallbox_manager
+    cards:
+    
+    ###############################################################################
+    # ENERGIE
+    ###############################################################################
+    
+      - type: entities
+        title: ⚡ Energie
+        show_header_toggle: false
+    
+        entities:
+    
+          - entity: sensor.hems_grid_power
+            name: Netzbezug / Einspeisung
+    
+          - entity: sensor.hems_available_power
+            name: Verfügbare Ladeleistung
+    
+          - entity: sensor.hems_active_wallbox
+            name: Aktive Wallbox
+    
+          - entity: binary_sensor.hems_charging_active
+            name: Laden aktiv
+    
+    ###############################################################################
+    # CONTROLLER
+    ###############################################################################
+    
+      - type: entities
+        title: 🧠 Controller
+        show_header_toggle: false
+    
+        entities:
+    
+          - entity: input_select.hems_controlled_wallbox
+            name: Gesteuerte Wallbox
+    
+          - entity: input_select.hems_wallbox_mode
+            name: Lademodus
+    
+          - entity: input_select.hems_wallbox_priority
+            name: Priorität
+    
+          - entity: input_datetime.hems_last_controller_run
+            name: Letzter Lauf
+    
+          - entity: input_datetime.hems_last_current_change
+            name: Letzte Stromänderung
+    
+    ###############################################################################
+    # REGELUNG
+    ###############################################################################
+    
+      - type: entities
+        title: 🎯 Regelung
+        show_header_toggle: false
+    
+        entities:
+    
+          - entity: input_number.hems_start_power
+            name: Startleistung
+    
+          - entity: input_number.hems_stop_power
+            name: Stoppleistung
+    
+          - entity: input_number.hems_deadband
+            name: Totzone
+    
+          - entity: input_number.hems_power_reserve
+            name: Leistungsreserve
+    
+          - entity: input_number.hems_current_step
+            name: Stromänderung
+    
+          - entity: input_number.hems_current_hold_time
+            name: Hold Time
+    
+    ###############################################################################
+    # GO-E
+    ###############################################################################
+    
+      - type: entities
+        title: 🔋 Go-e
+        show_header_toggle: false
+    
+        entities:
+    
+          - entity: input_boolean.hems_goe_enabled
+            name: Aktiv
+    
+          - entity: sensor.hems_go_e_power
+            name: Ladeleistung
+    
+          - entity: number.goe_082888_amp
+            name: Sollstrom
+    
+          - entity: binary_sensor.goe_082888_fsp
+            name: Lädt
+    
+          - entity: select.goe_082888_psm
+            name: Phasenmodus
+    
+    ###############################################################################
+    # EVBOX
+    ###############################################################################
+    
+      - type: entities
+        title: 🚗 EVBox
+        show_header_toggle: false
+    
+        entities:
+    
+          - entity: input_boolean.hems_evbox_enabled
+            name: Aktiv
+    
+          - entity: sensor.hems_evbox_power
+            name: Ladeleistung
+    
+          - entity: sensor.22052459_current_offered
+            name: Sollstrom
+    
+          - entity: sensor.22052459_current_import
+            name: Iststrom
+    
+          - entity: sensor.22052459_status_connector
+            name: Status
+    
+    ###############################################################################
+    # DEBUG
+    ###############################################################################
+    
+      - type: entities
+        title: 🛠 Debug
+        show_header_toggle: false
+        state_color: true
+    
+        entities:
+    
+          - entity: sensor.hems_grid_power
+    
+          - entity: sensor.hems_available_power
+    
+          - entity: sensor.hems_active_wallbox
+    
+          - entity: sensor.hems_wallbox_power
+    
+          - entity: sensor.hems_wallbox_current
+    
+          - entity: binary_sensor.hems_charging_active
+    
+    ###############################################################################
+    # TEST
+    ###############################################################################
+    
+      - type: entities
+        title: ▶ Testfunktionen
+        show_header_toggle: false
+    
+        entities:
+    
+          - entity: script.hems_controller
+    
+          - entity: script.hems_charge_start
+    
+          - entity: script.hems_charge_stop
+    
+          - entity: script.hems_power_manager
+    
+          - entity: script.hems_phase_manager
+    
+          - entity: script.hems_wallbox_manager
