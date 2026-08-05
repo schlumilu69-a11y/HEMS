@@ -24,7 +24,10 @@ hems_evbox_start:
         devid: "22052459"
         conn_id: 1
         limit_amps: 6
-        
+    - action: script.hems_log
+      data:
+        manager: EVBOX
+        message: "Startbefehl an EVBox gesendet"   
 ################################################################################
 # STOP CHARGING
 ################################################################################
