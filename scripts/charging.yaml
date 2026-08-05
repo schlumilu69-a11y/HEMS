@@ -11,39 +11,52 @@
 ################################################################################ 
 # CHARGE START 
 ################################################################################
-hems_goe_start:
+hems_start_manager:
 
-  alias: HEMS - Go-e Start
+  alias: HEMS - Start Manager
 
   mode: single
+
+  variables:
+
+    wallbox: >
+      {{ states('sensor.hems_active_wallbox') | lower }}
 
   sequence:
 
     - action: script.hems_log
       data:
-        manager: GOE
-        message: "Starte Go-e mit 1 Phase"
+        manager: START
+        message: >
+          Starte {{ wallbox }}
 
-    # 1-phasig
-    - action: select.select_option
-      target:
-        entity_id: select.goe_082888_psm
-      data:
-        option: "1"
+    - choose:
 
-    # Mindeststrom
-    - action: number.set_value
-      target:
-        entity_id: number.goe_082888_amp
-      data:
-        value: 6
+        #######################################################################
+        # EVBox
+        #######################################################################
 
-    # Laden freigeben
-    - action: number.set_value
-      target:
-        entity_id: number.goe_082888_frc
-      data:
-        value: 2
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ wallbox == 'evbox' }}
+
+          sequence:
+
+            - action: script.hems_evbox_start
+
+        #######################################################################
+        # Go-e
+        #######################################################################
+
+        - conditions:
+            - condition: template
+              value_template: >
+                {{ wallbox == 'go-e' }}
+
+          sequence:
+
+            - action: script.hems_goe_start
 
 ################################################################################
 # CHARGE STOP
