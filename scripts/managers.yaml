@@ -13,7 +13,7 @@ hems_start_manager:
   variables:
 
     active_wallbox: >
-      {{ states('sensor.hems_active_wallbox') | lower }}
+      {{ states('sensor.hems_connected_wallbox') | lower }}
 
   sequence:
 
