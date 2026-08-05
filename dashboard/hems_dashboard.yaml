@@ -92,7 +92,7 @@ cards:
       - entity: input_boolean.hems_goe_enabled
         name: Aktiv
 
-      - entity: sensor.hems_goe_power
+      - entity: sensor.hems_go_e_power
         name: Ladeleistung
 
       - entity: number.goe_082888_amp
