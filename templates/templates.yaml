@@ -322,17 +322,23 @@
         {% endif %}
 
         
-###########################################################################
-# Connected Wallbox
-###########################################################################
+###############################################################################
+# CONNECTED WALLBOX
+###############################################################################
 
     - name: HEMS Connected Wallbox
       unique_id: hems_connected_wallbox
 
       state: >
 
+        {% set goe_state = states('sensor.goe_082888_car_value') %}
+
         {% set goe_connected =
-             is_state('binary_sensor.goe_082888_fsp','on') %}
+             goe_state not in [
+               'Inaktiv/Frei',
+               'unknown',
+               'unavailable'
+             ] %}
 
         {% set evbox_state =
              states('sensor.22052459_status_connector') %}
