@@ -12,19 +12,19 @@ hems_evbox_start:
 
   alias: HEMS - EVBox Start
 
-  mode: single
-
   sequence:
 
     - action: script.hems_log
       data:
-        message: "EVBox: Starte Ladevorgang"
+        manager: EVBOX
+        message: "Starte EVBox"
 
-    ###########################################################################
-    # TODO:
-    # EVBox Start Service ergänzen
-    ###########################################################################
-
+    - action: ocpp.set_charge_rate
+      data:
+        devid: "22052459"
+        conn_id: 1
+        limit_amps: 6
+        
 ################################################################################
 # STOP CHARGING
 ################################################################################
