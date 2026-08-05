@@ -151,7 +151,7 @@
 ###########################################################################
 
     - name: HEMS Go-e Power
-      unique_id: hems_goe_power2
+      unique_id: hems_goe_power
       device_class: power
       state_class: measurement
       unit_of_measurement: W
