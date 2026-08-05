@@ -1,6 +1,9 @@
 title: HEMS
-path: hems
-icon: mdi:home-lightning-bolt
+
+views:
+  - title: Übersicht
+    path: overview
+    icon: mdi:home-lightning-bolt
 
 cards:
 
