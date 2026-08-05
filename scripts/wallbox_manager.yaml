@@ -43,7 +43,14 @@ hems_wallbox_manager:
       {{ states('select.goe_082888_psm') }}
 
   sequence:
-
+    - action: script.hems_log
+      data:
+        manager: WALLBOX
+        message: >
+          Manager gestartet |
+          Go-e={{ goe_charging }} |
+          EVBox={{ evbox_charging }} |
+          Current={{ wallbox_current }}A
 ###############################################################################
 # Nur eingreifen wenn beide Wallboxen gleichzeitig laden
 ###############################################################################
