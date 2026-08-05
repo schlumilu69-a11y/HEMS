@@ -10,9 +10,48 @@ hems_start_manager:
 
   mode: single
 
+  variables:
+
+    active_wallbox: >
+      {{ states('sensor.hems_active_wallbox') | lower }}
+
   sequence:
 
-    - action: script.hems_charge_start
+    - action: script.hems_log
+      data:
+        manager: START
+        message: >
+          Starte {{ active_wallbox }}
+
+    - choose:
+
+        #######################################################################
+        # EVBox
+        #######################################################################
+
+        - conditions:
+
+            - condition: template
+              value_template: >
+                {{ active_wallbox == 'evbox' }}
+
+          sequence:
+
+            - action: script.hems_evbox_start
+
+        #######################################################################
+        # Go-e
+        #######################################################################
+
+        - conditions:
+
+            - condition: template
+              value_template: >
+                {{ active_wallbox == 'go-e' }}
+
+          sequence:
+
+            - action: script.hems_goe_start
 
 ################################################################################
 #
@@ -26,6 +65,45 @@ hems_stop_manager:
 
   mode: single
 
+  variables:
+
+    active_wallbox: >
+      {{ states('sensor.hems_active_wallbox') | lower }}
+
   sequence:
 
-    - action: script.hems_charge_stop
+    - action: script.hems_log
+      data:
+        manager: STOP
+        message: >
+          Stoppe {{ active_wallbox }}
+
+    - choose:
+
+        #######################################################################
+        # EVBox
+        #######################################################################
+
+        - conditions:
+
+            - condition: template
+              value_template: >
+                {{ active_wallbox == 'evbox' }}
+
+          sequence:
+
+            - action: script.hems_evbox_stop
+
+        #######################################################################
+        # Go-e
+        #######################################################################
+
+        - conditions:
+
+            - condition: template
+              value_template: >
+                {{ active_wallbox == 'go-e' }}
+
+          sequence:
+
+            - action: script.hems_goe_stop
